@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Utils\Mail\index.html" />
+    <None Remove="Utils\Mail\style.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Utils\Mail\index.html" />
+    <Content Include="Utils\Mail\style.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="3.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.17" />
@@ -20,6 +31,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.21.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+    <PackageReference Include="MimeKit" Version="3.4.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.21.0" />
   </ItemGroup>
@@ -28,7 +40,7 @@
     <Folder Include="Areas\admin\Data\" />
     <Folder Include="Areas\admin\Views\" />
     <Folder Include="wwwroot\res\BstImgs\" />
-    <Folder Include="wwwroot\res\SanPhamRes\Imgs\SP01\" />
+    <Folder Include="wwwroot\res\SanPhamRes\Imgs\" />
     <Folder Include="wwwroot\res\SanPhamRes\Thumb\" />
   </ItemGroup>
 

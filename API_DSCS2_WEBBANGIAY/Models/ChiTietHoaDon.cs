@@ -9,9 +9,11 @@ namespace API_DSCS2_WEBBANGIAY.Models
     {
         public int IdHoaDon { get; set; }
         public string MasanPham { get; set; }
-        public int? Soluong { get; set; }
+        public int? Qty { get; set; }
+        public string Color { get; set; }
+        public int Size { get; set; }
         public decimal? DonGia { get; set; }
-
+            
         public virtual HoaDon IdHoaDonNavigation { get; set; }
         public virtual SanPham MasanPhamNavigation { get; set; }
     }

@@ -74,27 +74,22 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // POST: api/DanhMucDetails
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<DanhMucDetails>> PostDanhMucDetails(DanhMucDetails danhMucDetails)
+        [HttpPost("{maSP}")]
+        public async Task<ActionResult<DanhMucDetails>> PostDanhMucDetails(DanhMuc dm,string maSP)
         {
-            _context.DanhMucDetails.Add(danhMucDetails);
             try
             {
-                await _context.SaveChangesAsync();
+                if(dm != null)
+                {
+                    TestFnc(ref dm, maSP);
+                }
+                    return Ok();
             }
             catch (DbUpdateException)
             {
-                if (DanhMucDetailsExists(danhMucDetails.danhMucId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest();
             }
 
-            return CreatedAtAction("GetDanhMucDetails", new { id = danhMucDetails.danhMucId }, danhMucDetails);
         }
 
         // DELETE: api/DanhMucDetails/5
@@ -117,5 +112,38 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             return _context.DanhMucDetails.Any(e => e.danhMucId == id);
         }
+        private int TestFnc(ref DanhMuc dm,string maSP)
+        {
+            if(dm == null)
+            {
+                return 0;
+            }
+            else
+            {
+                var parentID = dm.ParentCategoryID;
+                var ID = dm.Id;
+                if (parentID<=-1)
+                {
+                    _context.DanhMucDetails.Add(new DanhMucDetails() { maSP = maSP, danhMucId = ID });
+                    _context.SaveChanges();
+                    return 0;
+                }
+                var parent = _context.DanhMucs.FirstOrDefault(x => x.Id == parentID);
+                _context.DanhMucDetails.Add(new DanhMucDetails() { maSP = maSP, danhMucId = ID });
+                 _context.SaveChanges();
+                return TestFnc( ref parent, maSP);
+            }
+        }
+        //[HttpGet("Test")]
+        //public async Task<IActionResult> Test()
+        //{
+        //    DanhMuc dm = new DanhMuc() { Id=11,ParentCategoryID=9};
+        //    if(dm!= null)
+        //    {
+        //        TestFnc(ref dm);
+        //    }
+            
+        //    return Ok();
+        //}
     }
 }

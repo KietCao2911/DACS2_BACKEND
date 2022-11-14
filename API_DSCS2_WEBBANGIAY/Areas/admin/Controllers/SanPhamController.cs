@@ -24,18 +24,36 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         }
 
         // GET: api/SanPham
-        [HttpGet]
-        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "color")] string color,int pageSize,int? page )
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "color")] string color, int pageSize, int? page, string id)
         {
-           
+
             pageSize = pageSize == 0 ? 5 : pageSize;
-            var products = _context.SanPhams.Include(x => x.IdBstNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdMauSacNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdSizeNavigation).Where(x=>x.SoLuongNhap>=0);
-           
-            if(color is not null)
+            IQueryable<SanPham> products = Enumerable.Empty<SanPham>().AsQueryable();
+            if(id != "undefined")
+            {
+                var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == id);
+                products = _context.SanPhams.
+                   Include(x => x.IdBstNavigation).
+                   Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).
+                   Include(x => x.SoLuongDetails).ThenInclude(x => x.IdMauSacNavigation).
+                   Include(x => x.SoLuongDetails).ThenInclude(x => x.IdSizeNavigation)
+                   .Include(x => x.DanhMucDetails).Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id)).Where(x => x.SoLuongTon >= 0);
+            }
+            else
+            {
+                products= _context.SanPhams.
+                  Include(x => x.IdBstNavigation).
+                  Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).
+                  Include(x => x.SoLuongDetails).ThenInclude(x => x.IdMauSacNavigation).
+                  Include(x => x.SoLuongDetails).ThenInclude(x => x.IdSizeNavigation)
+                  .Include(x => x.DanhMucDetails);
+            }
+            if (color is not null)
             {
                 products = products.Where(x => x.SoLuongDetails.FirstOrDefault(x => x.maMau == color).maMau == color);
             }
-            if(size is not null)
+            if (size is not null)
             {
                 int sizeInt = Int32.Parse(size);
                 products = products.Where(x => x.SoLuongDetails.FirstOrDefault(x => x._idSize == sizeInt)._idSize == sizeInt);
@@ -49,13 +67,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     products = products.OrderBy(s => s.CreatedAt);
                     break;
                 case "date-newest":
-                    products =products.OrderByDescending(s => s.CreatedAt);
+                    products = products.OrderByDescending(s => s.CreatedAt);
                     break;
                 default:
-                    products =products.OrderBy(s => s.GiaBan);
+                    products = products.OrderBy(s => s.GiaBan);
                     break;
             }
-            var result =await PaggingService<SanPham>.CreateAsync(products, page ?? 1, pageSize);
+            var result = await PaggingService<SanPham>.CreateAsync((IQueryable<SanPham>)products, page ?? 1, pageSize);
             var select = result.Select(x => new
             {
                 MaSanPham = x?.MaSanPham,
@@ -64,8 +82,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 GiaBan = x?.GiaBan,
                 SoLuongNhap = x?.SoLuongNhap,
                 SoLuongTon = x?.SoLuongTon,
+                Slug = x?.Slug,
                 BoSuuTap = new { key = x?.IdBstNavigation?.Id, value = x?.IdBstNavigation?.TenBoSuuTap },
                 Img = x?.Img,
+                Size = x.SoLuongDetails?.Select(x => new
+                {
+                    label = x.IdSizeNavigation.Size1,
+                    value = x._idSize,
+                }),
                 Color = x.ChiTietHinhAnhs?.GroupBy(x => x.IdMaMau).Select(x => new
                 {
                     IdMaumau = x.First().IdMaMau,
@@ -74,12 +98,12 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         uid = x.IdHinhAnh,
                         name = x.IdHinhAnhNavigation.FileName,
                         status = "done",
-                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\"+x.MaSanPham+"\\" + x.IdMaMau + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
+                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
                     })
                 })
 
 
-            }); ;
+            }); ; ;
             return Ok(new
             {
                 products = select,
@@ -88,7 +112,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         }
 
         // GET: api/SanPham/5
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("san-pham/{id}")]
         public async Task<ActionResult<SanPham>> GetSanPham(string id)
         {
             var sanPham = await _context.SanPhams.Include(x => x.IdBstNavigation).Include(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdMauSacNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdSizeNavigation).Where(x => x.SoLuongTon >= 0).Include(x=>x.DanhMucDetails).ThenInclude(x=>x.IdDanhMucNavigation).FirstOrDefaultAsync(x=>x.MaSanPham==id);
@@ -141,6 +166,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     Idmau= x.First().maMau,
                     sizeDetails = x.Select(x => new
                     {
+                        _id = x._id,
                         idSize = x._idSize,
                         sizeLabel = x.IdSizeNavigation.Size1,
                         soLuong = x.Soluong,
@@ -152,7 +178,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     ParentId = x.IdDanhMucNavigation.ParentCategoryID,
                     TenDanhMuc = x.IdDanhMucNavigation.TenDanhMuc
                 }),
-                MauSac = sanPham.ChiTietHinhAnhs?.GroupBy(x => x.IdMaMau).Select(x => new
+                Color = sanPham.ChiTietHinhAnhs?.GroupBy(x => x.IdMaMau).Select(x => new
                 {
                     IdMaumau = x.First().IdMaMau,
                     HinhAnhInfo = x.Select(x => new
@@ -367,6 +393,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPost("Upload-Mutiple/{MaSP}/{MaMau}")]
         public async Task<IActionResult> UploadMutiple(IFormFile file, string MaSP,string MaMau)
         {
+            if (file is null) return BadRequest();
   
                     var folder = "wwwroot//res//SanPhamRes//Imgs//" + MaSP+"//"+MaMau+"//";
                     var path = Path.Combine(
@@ -391,8 +418,15 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                             hinhAnhSanPham.IdMaMau = MaMau; 
                             _context.ChiTietHinhAnhs.Add(hinhAnhSanPham);
                             await _context.SaveChangesAsync();
+                    return Ok(new
+                    {
+                        uid = hinhAnhSanPham.IdHinhAnh,
+                        name = file.FileName,
+                        status = "done",
+                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + hinhAnhSanPham.MaSanPham.Trim() + "\\" + hinhAnhSanPham.IdMaMau + "\\" + file.FileName.Trim()
+                    });
 
-                        }
+                }
                         catch (Exception err)
                         {
                             return BadRequest(new
@@ -404,12 +438,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     }
 
 
-            return Ok(new
-            {
-                success = true,
-                img = file.FileName,
-
-            });
+          
         }
         [HttpDelete("Remove-Mutiple")]
         public async Task<IActionResult> RemoveMutiple(string fileName, string _id)

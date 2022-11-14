@@ -78,39 +78,60 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         // POST: api/SoLuongDetail
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<SoLuongDetails>> PostSoLuongDetails(SoLuongDetails soLuongDetails,string maSP)
+        public async Task<ActionResult<SoLuongDetails>> PostSoLuongDetails(SoLuongDetails soLuongDetails)
         {
 
-            _context.SoLuongDetails.Add(soLuongDetails);
+
             try
             {
-                
-                var product = await _context.SanPhams.FirstOrDefaultAsync(x=>x.MaSanPham==maSP);
-                if(product!=null)
+                var soLuongOld = await _context.SoLuongDetails.FirstOrDefaultAsync(x=>x.maSanPham==soLuongDetails.maSanPham&&x._idSize==soLuongDetails._idSize&&x.maMau==soLuongDetails.maMau);
+                if(soLuongOld is not null)
                 {
-                    product.SoLuongNhap += (int)soLuongDetails.Soluong;
-                    product.SoLuongTon = product.SoLuongNhap;
-                    await _context.SaveChangesAsync();
-                    return Ok(soLuongDetails);
-                }
-            }
-            catch (DbUpdateException)
-            {
-                if (SoLuongDetailsExists(soLuongDetails.maMau))
-                {
-                    return Conflict();
+                    _context.SoLuongDetails.Update(soLuongDetails);
                 }
                 else
                 {
-                    throw;
+                    _context.SoLuongDetails.Add(soLuongDetails);
                 }
+                await _context.SaveChangesAsync();
+                var item = await _context.SoLuongDetails.Include(x => x.IdSizeNavigation).FirstOrDefaultAsync(x => x.maSanPham == soLuongDetails.maSanPham && x._idSize == soLuongDetails._idSize && x.maMau == soLuongDetails.maMau);
+                if(soLuongOld is  null)
+                {
+                    return Ok(new
+                    {
+                        _id = item._id,
+                        maMau = item.maMau,
+                        idSize = item._idSize,
+                        sizeLabel = item.IdSizeNavigation.Size1,
+                        soLuong = item.Soluong,
+                        action="Add",
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        _id = item._id,
+                        maMau = item.maMau,
+                        idSize = item._idSize,
+                        sizeLabel = item.IdSizeNavigation.Size1,
+                        soLuong = item.Soluong,
+                        action="Update"
+
+                    });
+                }
+                
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
             }
 
-            return BadRequest();
+           
         }
 
         // DELETE: api/SoLuongDetail/5
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSoLuongDetails(int id)
         {
             try
@@ -121,13 +142,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     return NotFound();
                 }
                 _context.SoLuongDetails.Remove(soLuongDetails);
-                var product = await _context.SanPhams.FirstOrDefaultAsync(x => x.MaSanPham == soLuongDetails.maSanPham);
-                if (product != null)
-                {
-                    product.SoLuongNhap -= (int)soLuongDetails.Soluong;
-                    product.SoLuongTon = product.SoLuongNhap;
-                    await _context.SaveChangesAsync();
-                }
+                await _context.SaveChangesAsync();
+                return Ok(new {_id=id,maMau = soLuongDetails.maMau});
             }
             catch (Exception ex)
             {

@@ -9,7 +9,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
     {
         public DanhMuc()
         {
-            SanPhams = new HashSet<SanPham>();
             DanhMucDetails = new HashSet<DanhMucDetails>();
         }
 
@@ -18,7 +17,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string TenDanhMuc { get; set; }
         public int? GioiTinhCode { get; set; }
         public int? ParentCategoryID { get; set; }
-        public virtual ICollection<SanPham> SanPhams { get; set; }
         public virtual ICollection<DanhMucDetails> DanhMucDetails { get; set; }
     }
 }

@@ -10,6 +10,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public TaiKhoan()
         {
             HoaDons = new HashSet<HoaDon>();
+            DiaChis = new HashSet<DiaChi>();
         }
 
         public string TenTaiKhoan { get; set; }
@@ -21,5 +22,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
         public virtual KhachHang SdtKhNavigation { get; set; }
         public virtual ICollection<HoaDon> HoaDons { get; set; }
+        public virtual ICollection<DiaChi> DiaChis { get; set; }
     }
 }

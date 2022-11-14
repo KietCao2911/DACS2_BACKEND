@@ -170,9 +170,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         var BST = _context.BoSuuTaps.FirstOrDefault(x => x.Id == Id);
                         if (BST != null)
                         {
-                            BST.Img = file.FileName;
-
-                                var res = await _context.SaveChangesAsync();
+                                BST.Img = file.FileName;
+                                _context.BoSuuTaps.Update(BST);
+                                await _context.SaveChangesAsync();
                                 return Ok(new
                                 {
                                     success = true,

@@ -1,4 +1,5 @@
 using API_DSCS2_WEBBANGIAY.Models;
+using API_DSCS2_WEBBANGIAY.Utils.Mail;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -67,11 +68,13 @@ namespace API_DSCS2_WEBBANGIAY
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
-            services.AddTransient<ShoesEcommereContext>();
+            services.AddScoped<ShoesEcommereContext>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API_DSCS2_WEBBANGIAY", Version = "v1" });
             });
+            services.AddTransient<IMailService, MailService>();
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

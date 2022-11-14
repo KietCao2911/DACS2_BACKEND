@@ -41,7 +41,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 var currentUser = GetCurrentUser();
-                var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).ThenInclude(x=>x.DiaChis).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
                 return Ok(new
                 {
                     user = new
@@ -86,8 +86,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     tk.TenTaiKhoan = body.UserName;
                     _context.TaiKhoans.Add(tk);
                     await _context.SaveChangesAsync();
-                    var token = Generate(user, DateTime.Now.AddSeconds(15));
-                    var refreshToken = Generate(user, DateTime.Now.AddDays(30));
+                    var token = Generate(tk, DateTime.Now.AddSeconds(15));
+                    var refreshToken = Generate(tk, DateTime.Now.AddDays(30));
                     return Ok(new
                     {
                         token,

@@ -28,49 +28,57 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDanhMucUI()
         {
-            Dictionary<string, List<DanhMuc>> dic = new Dictionary<string, List<DanhMuc>>();
-            var Bac0 = await _context.DanhMucs.Where(x=>x.ParentCategoryID==0).ToListAsync();
-            var danhmucs = await _context.DanhMucs.ToListAsync();
-            List<DanhMuc> Bac1 = new List<DanhMuc>();
-            List<DanhMuc> Bac2 = new List<DanhMuc>();
-            List<Menu> menu = new List<Menu>(); 
-            for(int i = 0;i< Bac0.Count; i++)
+            try
             {
-                Menu Level0 = new Menu();
-                Level0.info = Bac0[i];
-                menu.Add(Level0);
-                var lv1 = danhmucs.Where(x => x.ParentCategoryID == Bac0[i].Id).ToList();
-                if(lv1.Count>0)
+                Dictionary<string, List<DanhMuc>> dic = new Dictionary<string, List<DanhMuc>>();
+                var Bac0 = await _context.DanhMucs.Where(x => x.ParentCategoryID == -1).ToListAsync();
+                var danhmucs = await _context.DanhMucs.ToListAsync();
+                List<DanhMuc> Bac1 = new List<DanhMuc>();
+                List<DanhMuc> Bac2 = new List<DanhMuc>();
+                List<Menu> menu = new List<Menu>();
+                for (int i = 0; i < Bac0.Count; i++)
                 {
-                    
-                    for(int item1=0;item1<lv1.Count; item1++)
+                    Menu Level0 = new Menu();
+                    Level0.info = Bac0[i];
+                    menu.Add(Level0);
+                    var lv1 = danhmucs.Where(x => x.ParentCategoryID == Bac0[i].Id).ToList();
+                    if (lv1.Count > 0)
                     {
-                        Level1 Level1 = new Level1();
-                        Level1.info = lv1[ item1];
-                        menu[i].Children.Add(Level1);
-                        var lv2 = danhmucs.Where(x => x.ParentCategoryID == lv1[item1].Id).ToList();
-                        if (lv2.Count > 0)
+
+                        for (int item1 = 0; item1 < lv1.Count; item1++)
                         {
-                          
-                            for (int item2 = 0; item2 < lv2.Count; item2++)
+                            Level1 Level1 = new Level1();
+                            Level1.info = lv1[item1];
+                            menu[i].Children.Add(Level1);
+                            var lv2 = danhmucs.Where(x => x.ParentCategoryID == lv1[item1].Id).ToList();
+                            if (lv2.Count > 0)
                             {
-                                Level2 Level2 = new Level2();
-                                Level2.info = lv2[item2];
-                                menu[i].Children[item1].Children.Add(Level2);
+
+                                for (int item2 = 0; item2 < lv2.Count; item2++)
+                                {
+                                    Level2 Level2 = new Level2();
+                                    Level2.info = lv2[item2];
+                                    menu[i].Children[item1].Children.Add(Level2);
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
+                return Ok(new
+                {
+                    menu,
+                    danhmucs = danhmucs,
+                });
+            }
+            catch(Exception ex)
+            {
+                return BadRequest();
             }
            
             
            
-            return Ok(new
-            {
-                menu,
-                danhmucs = danhmucs,
-            });
+          
         }
         [HttpGet("GetAllDanhMuc")]
         public async Task<IActionResult> GetAllDanhMuc()
@@ -129,10 +137,20 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         public async Task<ActionResult<DanhMuc>> PostDanhMuc(DanhMuc danhMuc)
         {
             if (String.IsNullOrEmpty(danhMuc.TenDanhMuc))  return BadRequest();
-            danhMuc.Slug = CustomSlug.Slugify(danhMuc.TenDanhMuc);
-            _context.DanhMucs.Add(danhMuc);
+            
+           
             try
             {
+                var parentDM = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Id == danhMuc.ParentCategoryID);
+                if (parentDM != null)
+                {
+                    danhMuc.Slug = CustomSlug.Slugify(parentDM.Slug+" "+danhMuc.TenDanhMuc);
+                }
+                else
+                {
+                    danhMuc.Slug = CustomSlug.Slugify(danhMuc.TenDanhMuc);
+                }
+                _context.DanhMucs.Add(danhMuc);
                 await _context.SaveChangesAsync();
                 var danhMucObj = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Id == danhMuc.Id);
                 if(danhMucObj is not null)

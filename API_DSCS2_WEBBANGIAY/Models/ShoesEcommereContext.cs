@@ -17,7 +17,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             : base(options)
         {
         }
-
+        public virtual DbSet<DiaChi> DiaChis { get; set; }
         public virtual DbSet<BoSuuTap> BoSuuTaps { get; set; }
         public virtual DbSet<ChiTietHoaDon> ChiTietHoaDons { get; set; }
         public virtual DbSet<ChiTietSale> ChiTietSales { get; set; }
@@ -38,7 +38,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=DESKTOP-FQD5SBV;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
+                optionsBuilder.UseSqlServer("Server=DESKTOP-Q6F43CF;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
+                optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             }
         }
 
@@ -58,10 +59,19 @@ namespace API_DSCS2_WEBBANGIAY.Models
             //    entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(e =>e.RoleDetails ).HasForeignKey(x => x.TenTaiKhoan).OnDelete(DeleteBehavior.Cascade); ;
             //    entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(e => e.RoleDetails).HasForeignKey(x => x.IdRole).OnDelete(DeleteBehavior.Cascade); ;
             //});
+            modelBuilder.Entity<DiaChi>(entity =>
+            {
+                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+                entity.Property(e => e.Phone).HasColumnType("char(10)");
+                entity.Property(e => e.Email).HasColumnType("char(254)");
+                entity.Property(e => e.Name).HasColumnType("nvarchar(30)");
+                entity.HasOne(e => e.KhachHangNavigation).WithMany(e => e.DiaChis).HasForeignKey(x => x.IDKH);
+                entity.HasOne(e => e.TaiKhoanNavigation).WithMany(e => e.DiaChis).HasForeignKey(x => x.TenTaiKhoan);
+            });
             modelBuilder.Entity<DanhMucDetails>(entity =>
             {
                 entity.HasKey(e => new { e.danhMucId, e.maSP });
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.HasOne(e => e.IdDanhMucNavigation).WithMany(e => e.DanhMucDetails).HasForeignKey(x => x.danhMucId).OnDelete(DeleteBehavior.Cascade); ;
                 entity.HasOne(e => e.IdSanPhamNavigation).WithMany(e => e.DanhMucDetails).HasForeignKey(x => x.maSP).OnDelete(DeleteBehavior.Cascade); ;
 
@@ -102,7 +112,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
             modelBuilder.Entity<ChiTietHoaDon>(entity =>
             {
-                entity.HasKey(e => new { e.IdHoaDon, e.MasanPham })
+                entity.HasKey(e => new { e.IdHoaDon, e.MasanPham,e.Size,e.Color })
                     .HasName("pk_CTHD");
 
                 entity.ToTable("ChiTietHoaDon");
@@ -118,8 +128,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
                 entity.Property(e => e.DonGia).HasColumnType("decimal(18, 2)");
 
-                entity.Property(e => e.Soluong).HasColumnName("soluong");
-
+                entity.Property(e => e.Qty).HasColumnName("Qty");
+                entity.Property(e => e.Color).HasColumnType("char(20)");
                 entity.HasOne(d => d.IdHoaDonNavigation)
                     .WithMany(p => p.ChiTietHoaDons)
                     .HasForeignKey(d => d.IdHoaDon)
@@ -287,8 +297,9 @@ namespace API_DSCS2_WEBBANGIAY.Models
           
 
                 entity.HasOne(d => d.KhachHangNavigation).WithMany(p => p.HoaDons).HasForeignKey(d => d.idKH).HasConstraintName("fk_HD_KH");
-                entity.HasOne(d => d.TenTaiKhoanNavigation).WithMany(p => p.HoaDons).HasForeignKey(d => d.idTaiKhoan);
 
+                entity.HasOne(d => d.TenTaiKhoanNavigation).WithMany(p => p.HoaDons).HasForeignKey(d => d.idTaiKhoan);
+                entity.HasOne(d => d.DiaChiNavigation).WithOne(x => x.HoaDon).HasForeignKey<HoaDon>(x=>x.IdDiaChi).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<KhachHang>(entity =>
@@ -298,9 +309,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.ToTable("KhachHang");
                 entity.Property(e => e.GiamGia).HasColumnType("int").HasDefaultValueSql("((0))");
-                entity.Property(e => e.Sdt).HasColumnType("char(10)");
+               
                 entity.Property(e => e.TienThanhToan).HasColumnType("money").HasDefaultValueSql("((0))");
-                entity.Property(e => e.DiaChi).HasColumnType("nvarchar(50)");
                 entity.Property(e => e.Id)
                     .HasMaxLength(10)
                     .IsUnicode(false)
@@ -501,7 +511,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.HasOne(d => d.SdtKhNavigation)
                     .WithMany(p => p.TaiKhoans)
                     .HasForeignKey(d => d.idKH)
-                    .HasConstraintName("fk_TaiKhoan_KH");
+                    .HasConstraintName("fk_TaiKhoan_KH").OnDelete(DeleteBehavior.Cascade);
             });
 
             OnModelCreatingPartial(modelBuilder);

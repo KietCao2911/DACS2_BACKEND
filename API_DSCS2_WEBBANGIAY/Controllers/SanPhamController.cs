@@ -24,8 +24,14 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
 
             pageSize = pageSize == 0 ? 5 : pageSize;
-            var products = _context.SanPhams.Include(x => x.IdBstNavigation).Include(x => x.SoLuongDetails).ThenInclude(x => x.IdMauSacNavigation).Include(x => x.SoLuongDetails).ThenInclude(x => x.IdSizeNavigation).Where(x => (x.DanhMucDetails.FirstOrDefault(x => x.IdDanhMucNavigation.Slug == id).IdDanhMucNavigation.Slug == id)).Where(x => x.SoLuongNhap >= 0);
-
+            var getID =await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == id);
+                var test = _context.SanPhams.Include(x => x.DanhMucDetails).Where(x=>x.DanhMucDetails.First().danhMucId == getID.Id).ToList();
+            var products = _context.SanPhams.
+                Include(x => x.IdBstNavigation).
+                Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).
+                Include(x => x.SoLuongDetails).ThenInclude(x => x.IdMauSacNavigation).
+                Include(x => x.SoLuongDetails).ThenInclude(x => x.IdSizeNavigation)
+                .Include(x => x.DanhMucDetails).Where(x => x.DanhMucDetails.Any(x=>x.danhMucId==getID.Id)).Where(x => x.SoLuongTon >= 0);
             if (color is not null)
             {
                 products = products.Where(x => x.SoLuongDetails.FirstOrDefault(x => x.maMau == color).maMau == color);
@@ -67,10 +73,16 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                     label = x.IdSizeNavigation.Size1,
                     value = x._idSize,
                 }),
-                Color = x.SoLuongDetails?.Select(x => new
+                Color = x.ChiTietHinhAnhs?.GroupBy(x => x.IdMaMau).Select(x => new
                 {
-                    label = x.IdMauSacNavigation.TenMau,
-                    value = x.maMau,
+                    IdMaumau = x.First().IdMaMau,
+                    HinhAnhInfo = x.Select(x => new
+                    {
+                        uid = x.IdHinhAnh,
+                        name = x.IdHinhAnhNavigation.FileName,
+                        status = "done",
+                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
+                    })
                 })
 
 
