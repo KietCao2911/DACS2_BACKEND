@@ -46,9 +46,21 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                        uid = x.IdHinhAnh,
                        name = x?.IdHinhAnhNavigation?.FileName,
                        status = "done",
-                       url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\SP01\\fff\\" + x?.IdHinhAnhNavigation?.FileName.Trim()
+                       url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
+
                    })
-               })
+               }),
+               ChiTietSoLuong = x?.SoLuongDetails.GroupBy(x => x.maMau).Select(x => new
+               {
+                   Idmau = x.First().maMau,
+                   sizeDetails = x.Select(x => new
+                   {
+                       _id = x._id,
+                       idSize = x._idSize,
+                       sizeLabel = x.IdSizeNavigation.Size1,
+                       soLuong = x.Soluong,
+                   }),
+               }),
 
 
            });; ;

@@ -100,7 +100,18 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         status = "done",
                         url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
                     })
-                })
+                }),
+                ChiTietSoLuong = x?.SoLuongDetails.GroupBy(x => x.maMau).Select(x => new
+                {
+                    Idmau = x.First().maMau,
+                    sizeDetails = x.Select(x => new
+                    {
+                        _id = x._id,
+                        idSize = x._idSize,
+                        sizeLabel = x.IdSizeNavigation.Size1,
+                        soLuong = x.Soluong,
+                    }),
+                }),
 
 
             }); ; ;
@@ -353,13 +364,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
            
             return BadRequest();
         }
-        [HttpDelete("Remove-Single")]
-        public async Task<IActionResult>RemoveSingle(string fileName, string _id)
+        [HttpDelete("RemoveImg")]
+        public async Task<IActionResult>RemoveImg(string fileName, int _id,string maSP,string maMau)
         {
             if (fileName != null)
             {
                 var path = Path.Combine(
-                Directory.GetCurrentDirectory(), "wwwroot//res//SanPhamRes//Thumb",
+                Directory.GetCurrentDirectory(), "wwwroot//res//SanPhamRes//Imgs//" + maSP + "//" + maMau + "//",
                 fileName);
                 
                 FileInfo file = new FileInfo(path);    
@@ -368,10 +379,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     if (file.Exists)
                     {
                         file.Delete();
-                        var product = await _context.SanPhams.FirstOrDefaultAsync(x => x.MaSanPham == _id);
-                        if (product != null)
+                        var hinhAnh = await _context.ChiTietHinhAnhs.FirstOrDefaultAsync(x=>x.MaSanPham==maSP&&x.IdMaMau == maMau&&x.IdHinhAnh == _id);
+                        if (hinhAnh != null)
                         {
-                            product.Img = null;
+                            _context.ChiTietHinhAnhs.Remove(hinhAnh);
                             await _context.SaveChangesAsync();
                             return Ok(new
                             {
@@ -379,7 +390,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                                 path = path
                             }); ;
                         }
-
+                        return BadRequest();
                     }
                 }
                 catch(Exception err)
@@ -403,6 +414,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     {
                         Directory.CreateDirectory(folder);
                     }
+                    else
+            {
+                return BadRequest("fileName existed");
+            }
                     using (var stream = new FileStream(path, FileMode.Create))
                     {
                         try
