@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20221116112616_removeFieldGiaDaGiamTblSanPham")]
+    partial class removeFieldGiaDaGiamTblSanPham
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -283,11 +285,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("money")
                         .HasColumnName("thanhtien");
 
-                    b.Property<DateTime>("createdAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
-
                     b.Property<int?>("idKH")
                         .HasColumnType("int");
 
@@ -296,11 +293,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.Property<int>("status")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("updatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
 
                     b.HasKey("Id");
 

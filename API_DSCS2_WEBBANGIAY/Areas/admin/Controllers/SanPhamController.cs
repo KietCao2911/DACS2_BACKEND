@@ -25,7 +25,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // GET: api/SanPham
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "color")] string color, int pageSize, int? page, string id)
+        public async Task<ActionResult> GetSanPhams(string? sort, [FromQuery(Name = "size")] string size, [FromQuery(Name = "color")] string color, int pageSize, int? page, string id, [FromQuery(Name = "sale")] bool sale)
         {
 
             pageSize = pageSize == 0 ? 5 : pageSize;
@@ -38,7 +38,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                    Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).
                    Include(x => x.SoLuongDetails).ThenInclude(x => x.IdMauSacNavigation).
                    Include(x => x.SoLuongDetails).ThenInclude(x => x.IdSizeNavigation)
-                   .Include(x => x.DanhMucDetails).Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id)).Where(x => x.SoLuongTon >= 0);
+                   .Include(x => x.DanhMucDetails).Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id));
             }
             else
             {
@@ -57,6 +57,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             {
                 int sizeInt = Int32.Parse(size);
                 products = products.Where(x => x.SoLuongDetails.FirstOrDefault(x => x._idSize == sizeInt)._idSize == sizeInt);
+            }
+            if(sale==true)
+            {
+                products = products.Where(x => x.GiamGia > 0);
             }
             switch (sort)
             {
@@ -80,6 +84,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 TenSanPham = x?.TenSanPham,
                 GiaBanDisplay = x?.VND(x.GiaBan),
                 GiaBan = x?.GiaBan,
+                GiamGia=x?.GiamGia,
                 SoLuongNhap = x?.SoLuongNhap,
                 SoLuongTon = x?.SoLuongTon,
                 Slug = x?.Slug,
@@ -127,7 +132,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [Route("san-pham/{id}")]
         public async Task<ActionResult<SanPham>> GetSanPham(string id)
         {
-            var sanPham = await _context.SanPhams.Include(x => x.IdBstNavigation).Include(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdMauSacNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdSizeNavigation).Where(x => x.SoLuongTon >= 0).Include(x=>x.DanhMucDetails).ThenInclude(x=>x.IdDanhMucNavigation).FirstOrDefaultAsync(x=>x.MaSanPham==id);
+            var sanPham = await _context.SanPhams.Include(x => x.IdBstNavigation).Include(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdMauSacNavigation).Include(x=>x.SoLuongDetails).ThenInclude(x=>x.IdSizeNavigation).Include(x=>x.DanhMucDetails).ThenInclude(x=>x.IdDanhMucNavigation).FirstOrDefaultAsync(x=>x.MaSanPham==id);
 
             if (sanPham == null)
             {
@@ -175,6 +180,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 ChiTietSoLuong = sanPham?.SoLuongDetails.GroupBy(x => x.maMau).Select(x => new
                 {
                     Idmau= x.First().maMau,
+                    colorLabel = x.First().IdMauSacNavigation.TenMau,
                     sizeDetails = x.Select(x => new
                     {
                         _id = x._id,
@@ -209,13 +215,42 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSanPham(string id, SanPham sanPham)
         {
+            var sp = await _context.SanPhams.FirstOrDefaultAsync(x => x.MaSanPham == sanPham.MaSanPham);
             sanPham.Slug = CustomSlug.Slugify(sanPham.TenSanPham);
             if (id != sanPham.MaSanPham.Trim())
             {
                 return BadRequest();
             }
-
-            sanPham.SoLuongTon = sanPham.SoLuongNhap;
+            if (sanPham.GiamGia != 0)
+            {
+                if(sp.GiamGia>0)
+                {
+                    var giaGoc = (decimal)sp.GiaBan / ((decimal)(100 - sp.GiamGia)/100);
+                    var giaGiam= giaGoc * ((decimal)(100 - sanPham.GiamGia) / 100);
+                    sanPham.GiaBan =(decimal)giaGiam;
+                }
+                else
+                {
+                    var phantram = (decimal)(100 - sanPham.GiamGia) / 100 ;
+                    var giaGiam = (decimal)(sanPham.GiaBan *phantram);
+                    sanPham.GiaBan = giaGiam;
+                }
+            }
+            else
+            {
+                if (sp.GiamGia > 0)
+                {
+                    var giaGoc = (decimal)sp.GiaBan / ((decimal)(100 - sp.GiamGia) / 100);
+                    var giaGiam = giaGoc * ((decimal)(100 - sanPham.GiamGia) / 100);
+                    sanPham.GiaBan = (decimal)giaGiam;
+                }
+                else
+                {
+                    var phantram = (decimal)(100 - sanPham.GiamGia) / 100;
+                    var giaGiam = (decimal)(sanPham.GiaBan * phantram);
+                    sanPham.GiaBan = giaGiam;
+                }
+            }
             _context.Entry(sanPham).State = EntityState.Modified;
 
             try
@@ -248,7 +283,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             if (sanPham != null)
             {
                 sanPham.Slug = CustomSlug.Slugify(sanPham.TenSanPham);
-                sanPham.SoLuongTon = sanPham.SoLuongNhap;
+                if (sanPham.GiamGia != 0)
+                {
+                    sanPham.GiaBan -= ((decimal)(sanPham.GiaBan * sanPham.GiamGia) / 100);
+                }
+                else
+                {
+                    sanPham.GiaBan /= (decimal)(100 - sanPham.GiamGia) / 100;
+                }
                 _context.SanPhams.Add(sanPham);
                 try
                 {
@@ -295,15 +337,23 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         public async Task<IActionResult> DeleteSanPham(string id)
         {
             var sanPham = await _context.SanPhams.FindAsync(id);
+           
             if (sanPham == null)
             {
                 return NotFound();
             }
-
-            _context.SanPhams.Remove(sanPham);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try {
+                var path = Path.Combine(
+                   Directory.GetCurrentDirectory(), "wwwroot//res//SanPhamRes//Imgs//" + sanPham.MaSanPham.Trim());
+                Directory.Delete(path, true);
+                _context.SanPhams.Remove(sanPham);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch(Exception err)
+            {
+                return BadRequest();
+            }
         }
 
         private bool SanPhamExists(string id)

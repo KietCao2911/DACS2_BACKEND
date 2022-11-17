@@ -94,12 +94,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     _context.SoLuongDetails.Add(soLuongDetails);
                 }
                 await _context.SaveChangesAsync();
-                var item = await _context.SoLuongDetails.Include(x => x.IdSizeNavigation).FirstOrDefaultAsync(x => x.maSanPham == soLuongDetails.maSanPham && x._idSize == soLuongDetails._idSize && x.maMau == soLuongDetails.maMau);
+                var item = await _context.SoLuongDetails.Include(x => x.IdSizeNavigation).Include(x=>x.IdMauSacNavigation).FirstOrDefaultAsync(x => x.maSanPham == soLuongDetails.maSanPham && x._idSize == soLuongDetails._idSize && x.maMau == soLuongDetails.maMau);
                 if(soLuongOld is  null)
                 {
                     return Ok(new
                     {
                         _id = item._id,
+                        colorLabel=item.IdMauSacNavigation.TenMau,
                         maMau = item.maMau,
                         idSize = item._idSize,
                         sizeLabel = item.IdSizeNavigation.Size1,
@@ -113,6 +114,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     {
                         _id = item._id,
                         maMau = item.maMau,
+                        colorLabel = item.IdMauSacNavigation.TenMau,
                         idSize = item._idSize,
                         sizeLabel = item.IdSizeNavigation.Size1,
                         soLuong = item.Soluong,

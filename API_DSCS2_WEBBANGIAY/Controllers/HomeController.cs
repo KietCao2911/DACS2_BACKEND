@@ -27,6 +27,7 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 MaSanPham = x?.MaSanPham,
                 TenSanPham = x?.TenSanPham,
                 GiaBanDisplay = x?.VND(x.GiaBan),
+                GiamGia = x?.GiamGia,
                 GiaBan = x?.GiaBan,
                 SoLuongNhap = x?.SoLuongNhap,
                 SoLuongTon = x?.SoLuongTon,

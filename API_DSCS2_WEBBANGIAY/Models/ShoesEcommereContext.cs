@@ -278,7 +278,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
 
                 entity.Property(e => e.Id).HasColumnName("_id");
-
+                entity.Property(e=>e.createdAt).HasDefaultValueSql("getdate()");
+                entity.Property(e=>e.updatedAt).HasDefaultValueSql("getdate()");
                 entity.Property(e => e.Giamgia)
                     .HasColumnType("money")
                     .HasColumnName("giamgia");
@@ -432,7 +433,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.Property(e => e.Mota).HasColumnType("ntext");
 
 
-                entity.Property(e => e.GiaDaGiam).HasColumnType("money");
 
                 entity.Property(e => e.Id)
                     .ValueGeneratedOnAdd()

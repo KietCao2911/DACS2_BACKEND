@@ -25,9 +25,9 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string? Img { get; set; }
         public string Slug { get; set; }
         public int? IdBst { get; set; }
+        public int? GiamGia { get; set; }
         public decimal GiaBan { get; set; }
         public string Mota { get; set; }
-        public decimal GiaDaGiam { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public virtual BoSuuTap IdBstNavigation { get; set; }
