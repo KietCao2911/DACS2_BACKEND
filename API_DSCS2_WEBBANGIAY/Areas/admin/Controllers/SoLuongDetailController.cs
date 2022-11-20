@@ -81,22 +81,29 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         public async Task<ActionResult<SoLuongDetails>> PostSoLuongDetails(SoLuongDetails soLuongDetails)
         {
 
-
             try
             {
                 var soLuongOld = await _context.SoLuongDetails.FirstOrDefaultAsync(x=>x.maSanPham==soLuongDetails.maSanPham&&x._idSize==soLuongDetails._idSize&&x.maMau==soLuongDetails.maMau);
                 if(soLuongOld is not null)
                 {
+                        int qtyUpdate = 0;
+                        if(soLuongOld.Soluong<soLuongDetails.Soluong)
+                        {
+                            // số lượng tăng
+                            qtyUpdate = (int)(soLuongDetails.Soluong - soLuongOld.Soluong);
+                            soLuongDetails.Soluong += qtyUpdate;
+                            soLuongDetails.SoluongTon = soLuongDetails.Soluong;
+                        }
+                        else
+                        {
+                            qtyUpdate = (int)(soLuongDetails.Soluong - soLuongOld.Soluong);
+                            soLuongDetails.Soluong += qtyUpdate;
+                            soLuongDetails.SoluongTon = soLuongDetails.Soluong;
+                        }
                     _context.SoLuongDetails.Update(soLuongDetails);
-                }
-                else
-                {
-                    _context.SoLuongDetails.Add(soLuongDetails);
-                }
-                await _context.SaveChangesAsync();
-                var item = await _context.SoLuongDetails.Include(x => x.IdSizeNavigation).Include(x=>x.IdMauSacNavigation).FirstOrDefaultAsync(x => x.maSanPham == soLuongDetails.maSanPham && x._idSize == soLuongDetails._idSize && x.maMau == soLuongDetails.maMau);
-                if(soLuongOld is  null)
-                {
+                    var item = await _context.SoLuongDetails.Include(x => x.IdSizeNavigation).Include(x => x.IdMauSacNavigation).FirstOrDefaultAsync(x => x.maSanPham == soLuongDetails.maSanPham && x._idSize == soLuongDetails._idSize && x.maMau == soLuongDetails.maMau);
+
+                    await _context.SaveChangesAsync();
                     return Ok(new
                     {
                         _id = item._id,
@@ -105,22 +112,17 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         idSize = item._idSize,
                         sizeLabel = item.IdSizeNavigation.Size1,
                         soLuong = item.Soluong,
-                        action="Add",
+                        action="Update",
                     });
                 }
                 else
                 {
-                    return Ok(new
-                    {
-                        _id = item._id,
-                        maMau = item.maMau,
-                        colorLabel = item.IdMauSacNavigation.TenMau,
-                        idSize = item._idSize,
-                        sizeLabel = item.IdSizeNavigation.Size1,
-                        soLuong = item.Soluong,
-                        action="Update"
-
-                    });
+                    soLuongDetails.SoluongTon = (int)soLuongDetails.Soluong;
+                    var item = await _context.SoLuongDetails.Include(x => x.IdSizeNavigation).Include(x => x.IdMauSacNavigation).FirstOrDefaultAsync(x => x.maSanPham == soLuongDetails.maSanPham && x._idSize == soLuongDetails._idSize && x.maMau == soLuongDetails.maMau );
+                    _context.SoLuongDetails.Add(soLuongDetails);
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                   
                 }
                 
             }

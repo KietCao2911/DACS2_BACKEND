@@ -22,15 +22,18 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string TenSanPham { get; set; }
         public int SoLuongNhap { get; set; }
         public int? SoLuongTon { get; set; }
+        public int? SoLuongBan { get; set; }
         public string? Img { get; set; }
         public string Slug { get; set; }
         public int? IdBst { get; set; }
         public int? GiamGia { get; set; }
+        public string maPhieuNhap { get; set; }
         public decimal GiaBan { get; set; }
         public string Mota { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public virtual BoSuuTap IdBstNavigation { get; set; }
+        public virtual PhieuNhap PhieuNhapNavigation { get; set; }
         public virtual ICollection<ChiTietHoaDon> ChiTietHoaDons { get; set; }
         public virtual ICollection<ChiTietSale> ChiTietSales { get; set; }
         public virtual ICollection<ReviewStar> ReviewStars { get; set; }

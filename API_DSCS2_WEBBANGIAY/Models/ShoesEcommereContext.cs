@@ -33,6 +33,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<Size> Sizes { get; set; }
         public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
         public virtual DbSet<SoLuongDetails> SoLuongDetails { get; set; }
+        public virtual DbSet<PhieuNhap> PhieuNhaps { get; set; }    
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -59,6 +60,15 @@ namespace API_DSCS2_WEBBANGIAY.Models
             //    entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(e =>e.RoleDetails ).HasForeignKey(x => x.TenTaiKhoan).OnDelete(DeleteBehavior.Cascade); ;
             //    entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(e => e.RoleDetails).HasForeignKey(x => x.IdRole).OnDelete(DeleteBehavior.Cascade); ;
             //});
+            modelBuilder.Entity<PhieuNhap>(entity=>
+            {
+                entity.Property(x => x.maPhieuNhap).HasColumnType("char(10)");
+                entity.HasKey(e => e.maPhieuNhap);
+                entity.Property(x => x.Dvt).HasColumnType("nvarchar(10)");
+                entity.Property(x => x.NgayNhap).HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+            });
             modelBuilder.Entity<DiaChi>(entity =>
             {
                 entity.HasKey(e => e.ID);
@@ -80,6 +90,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
             modelBuilder.Entity<SoLuongDetails>(entity =>
             {
                 entity.HasKey(e => new { e.maMau, e.maSanPham, e._idSize });
+                entity.Property(e => e.SoluongBan).HasDefaultValueSql("0");
+                entity.Property(e => e.SoluongTon).HasDefaultValueSql("0");
                 entity.Property(e => e._id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); ;
                 entity.HasOne(e => e.IdMauSacNavigation).WithMany(x => x.SoLuongDetails).HasForeignKey(x => x.maMau).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.IdSizeNavigation).WithMany(x => x.SoLuongDetails).HasForeignKey(x => x._idSize).OnDelete(DeleteBehavior.Cascade);
@@ -280,6 +292,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.Property(e => e.Id).HasColumnName("_id");
                 entity.Property(e=>e.createdAt).HasDefaultValueSql("getdate()");
                 entity.Property(e=>e.updatedAt).HasDefaultValueSql("getdate()");
+                entity.Property(e=>e.TienThanhToan).HasDefaultValueSql("0");
                 entity.Property(e => e.Giamgia)
                     .HasColumnType("money")
                     .HasColumnName("giamgia");
@@ -431,6 +444,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
                 entity.Property(e => e.GiaBan).HasColumnType("money");
                 entity.Property(e => e.Mota).HasColumnType("ntext");
+                entity.Property(e => e.SoLuongBan).HasDefaultValueSql("0");
 
 
 
@@ -463,6 +477,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .HasForeignKey(d => d.IdBst)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_sanpham_BST");
+                entity.HasOne(p => p.PhieuNhapNavigation).WithMany(x => x.SanPham).HasForeignKey(x => x.maPhieuNhap);
 
             });
 

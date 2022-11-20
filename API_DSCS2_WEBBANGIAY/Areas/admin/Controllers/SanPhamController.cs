@@ -47,7 +47,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                   Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).
                   Include(x => x.SoLuongDetails).ThenInclude(x => x.IdMauSacNavigation).
                   Include(x => x.SoLuongDetails).ThenInclude(x => x.IdSizeNavigation)
-                  .Include(x => x.DanhMucDetails);
+                  .Include(x => x.DanhMucDetails).Where(x=>x.SoLuongDetails.Any(x=>x.SoluongTon>0));
             }
             if (color is not null)
             {
@@ -283,14 +283,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             if (sanPham != null)
             {
                 sanPham.Slug = CustomSlug.Slugify(sanPham.TenSanPham);
-                if (sanPham.GiamGia != 0)
-                {
-                    sanPham.GiaBan -= ((decimal)(sanPham.GiaBan * sanPham.GiamGia) / 100);
-                }
-                else
-                {
-                    sanPham.GiaBan /= (decimal)(100 - sanPham.GiamGia) / 100;
-                }
+                //if (sanPham.GiamGia != 0)
+                //{
+                //    sanPham.GiaBan -= ((decimal)(sanPham.GiaBan * sanPham.GiamGia) / 100);
+                //}
+                //else
+                //{
+                //    sanPham.GiaBan /= (decimal)(100 - sanPham.GiamGia) / 100;
+                //}
                 _context.SanPhams.Add(sanPham);
                 try
                 {

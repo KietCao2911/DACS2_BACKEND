@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20221119063210_removeConstraintTblChiTietSoLuong")]
+    partial class removeConstraintTblChiTietSoLuong
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,17 +281,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("decimal(18,0)")
                         .HasColumnName("phiship");
 
-                    b.Property<string>("PhuongThucThanhToan")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("Thanhtien")
                         .HasColumnType("money")
                         .HasColumnName("thanhtien");
-
-                    b.Property<decimal>("TienThanhToan")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValueSql("0");
 
                     b.Property<DateTime>("createdAt")
                         .ValueGeneratedOnAdd()
@@ -546,9 +540,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .IsFixedLength(true);
 
                     b.Property<int?>("SoLuongBan")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("0");
+                        .HasColumnType("int");
 
                     b.Property<int>("SoLuongNhap")
                         .HasColumnType("int");
@@ -568,13 +560,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getdate()");
 
-                    b.Property<string>("maPhieuNhap")
-                        .HasColumnType("char(10)");
-
                     b.HasKey("MaSanPham")
                         .HasName("pk_sanpham");
-
-                    b.HasIndex("maPhieuNhap");
 
                     b.HasIndex(new[] { "IdBst" }, "IX_SanPham__id_BST");
 
@@ -829,13 +816,7 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasConstraintName("fk_sanpham_BST")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.PhieuNhap", "PhieuNhapNavigation")
-                        .WithMany("SanPham")
-                        .HasForeignKey("maPhieuNhap");
-
                     b.Navigation("IdBstNavigation");
-
-                    b.Navigation("PhieuNhapNavigation");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.SoLuongDetails", b =>
@@ -915,11 +896,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("ChiTietHinhAnhs");
 
                     b.Navigation("SoLuongDetails");
-                });
-
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.PhieuNhap", b =>
-                {
-                    b.Navigation("SanPham");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Sale", b =>

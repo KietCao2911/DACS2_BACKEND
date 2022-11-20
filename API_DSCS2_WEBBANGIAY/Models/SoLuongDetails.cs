@@ -7,6 +7,8 @@
         public string maSanPham { set; get; }
         public int _idSize { set; get; }
         public int? Soluong { set; get; }
+        public int? SoluongTon { set; get; }
+        public int? SoluongBan { set; get; }
         public virtual MauSac IdMauSacNavigation { set; get; }
         public virtual Size IdSizeNavigation { set; get; }
         public virtual SanPham IdSanPhamNavigation { set; get; }
