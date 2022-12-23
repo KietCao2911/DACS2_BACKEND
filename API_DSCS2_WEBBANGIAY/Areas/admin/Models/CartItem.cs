@@ -12,7 +12,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Models
         {
             this.items = items;
             this.qty = qty;
-            total = items != null ? (decimal)(qty * items.GiaBan) : 0;
+            total = items != null ? (decimal)(qty * items.GiaBanLe) : 0;
         }
         public decimal TotalPrice()
         {

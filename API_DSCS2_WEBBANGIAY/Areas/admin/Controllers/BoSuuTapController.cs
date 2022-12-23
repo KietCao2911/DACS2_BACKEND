@@ -42,12 +42,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             var products = await _context.SanPhams.Where(x=>x.IdBst==id).ToListAsync();
             var select = products.Select(x => new
             {
-                MaSanPham = x?.MaSanPham,
+                ID = x?.Id,
                 TenSanPham = x?.TenSanPham,
-                GiaBanDisplay = x?.VND(x.GiaBan),
-                GiaBan = x?.GiaBan,
-                SoLuongNhap = x?.SoLuongNhap,
-                SoLuongTon = x?.SoLuongTon,
                 //DanhMuc = new { key = x?.IdDmNavigation?.Id, value = x?.IdDmNavigation?.TenDanhMuc },
                 //BoSuuTap = new { key = x?.IdBstNavigation?.Id, value = x?.IdBstNavigation?.TenBoSuuTap },
                 //Img = x?.Img,

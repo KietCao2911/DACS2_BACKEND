@@ -11,7 +11,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             SanPhams = new HashSet<SanPham>();
         }
-
+        public string MaSanPham { get; set; }
         public int Id { get; set; }
         public string TenBoSuuTap { get; set; }
         public DateTime? CreatedAt { get; set; }

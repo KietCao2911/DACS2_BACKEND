@@ -2,8 +2,9 @@
 {
     public partial class DanhMucDetails
     {
-        public string maSP { get; set; }
+        public int IDSanPham { get; set; }
         public int danhMucId { get; set; }
+        public string MaSanPham { get; set; }
 
         public virtual DanhMuc IdDanhMucNavigation { get; set; }
         public virtual SanPham IdSanPhamNavigation { get; set; }

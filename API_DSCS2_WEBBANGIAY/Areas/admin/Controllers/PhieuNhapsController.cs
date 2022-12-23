@@ -46,7 +46,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPhieuNhap(string id, PhieuNhap phieuNhap)
         {
-            if (id != phieuNhap.maPhieuNhap)
+            if (id != phieuNhap.maPhieuNhap.Trim())
             {
                 return BadRequest();
             }
@@ -56,6 +56,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok(phieuNhap);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -81,6 +82,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                phieuNhap.maPhieuNhap = "PN" + phieuNhap.ID;
+                _context.PhieuNhaps.Update(phieuNhap);
+                await _context.SaveChangesAsync();
+                return Ok(phieuNhap);
             }
             catch (DbUpdateException)
             {

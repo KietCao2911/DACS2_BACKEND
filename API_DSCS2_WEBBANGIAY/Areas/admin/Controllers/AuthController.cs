@@ -41,18 +41,22 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 var currentUser = GetCurrentUser();
-                var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).ThenInclude(x=>x.DiaChis).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                var user = _context.TaiKhoans.Include(x => x.DiaChis).Include(x => x.HoaDons).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                if (user is null) return Unauthorized();
                 return Ok(new
                 {
                     user = new
                     {
                         userName = user.TenTaiKhoan,
                         role = user.Role,
-                        info = user.SdtKhNavigation
-
+                        info = user.DiaChis,
+                        hoadons= user.HoaDons,
+                        addressDefault = user.addressDefault,
+                        avatar= user.Avatar,
+                        nameDisplay = user.TenHienThi,
                     }
 
-                }); ;
+                });;;
             }
             catch (Exception ex)
             {
@@ -63,7 +67,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPost("SignIn")]
         public async Task<IActionResult> SignIn(LoginModel body)
         {
-            var user = await _context.TaiKhoans.Include(x=>x.SdtKhNavigation).FirstOrDefaultAsync(x => x.TenTaiKhoan == body.UserName);
+            var user = await _context.TaiKhoans.FirstOrDefaultAsync(x => x.TenTaiKhoan == body.UserName);
             if(user is not null)
             {
                 var token = Generate(user, DateTime.Now.AddSeconds(15));
@@ -82,7 +86,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     _context.KhachHangs.Add(body.info);
                     await _context.SaveChangesAsync();
                     TaiKhoan tk = new TaiKhoan();
-                    tk.idKH = body.info.Id;
                     tk.TenTaiKhoan = body.UserName;
                     _context.TaiKhoans.Add(tk);
                     await _context.SaveChangesAsync();
@@ -108,14 +111,14 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             try
             {
                 var currentUser = GetCurrentUser();
-                var user = _context.TaiKhoans.Include(x => x.SdtKhNavigation).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
+                var user = _context.TaiKhoans.Include(x=>x.DiaChis).FirstOrDefault(x => x.TenTaiKhoan == currentUser.TenTaiKhoan);
                 return Ok(new
                 {
                     user = new
                     {
                         userName = user.TenTaiKhoan,
                         role = user.Role,
-                        info = user.SdtKhNavigation
+                        info = user.DiaChis
 
                     }
 

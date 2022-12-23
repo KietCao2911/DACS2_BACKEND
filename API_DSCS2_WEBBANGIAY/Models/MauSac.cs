@@ -9,13 +9,16 @@ namespace API_DSCS2_WEBBANGIAY.Models
     {
         public MauSac()
         {
-            SoLuongDetails = new HashSet<SoLuongDetails>();
             ChiTietHinhAnhs = new HashSet<ChiTietHinhAnh>();
+            ChiTietHoaDons = new HashSet<ChiTietHoaDon>();
+            SanPhams = new HashSet<SanPham>();
         }
 
         public string MaMau { get; set; }
         public string TenMau { get; set; }
-        public virtual ICollection<SoLuongDetails> SoLuongDetails { get; set; }
         public virtual ICollection<ChiTietHinhAnh> ChiTietHinhAnhs { get; set; }
+        public virtual ICollection<ChiTietHoaDon> ChiTietHoaDons { get; set; }
+        public virtual ICollection<SanPham> SanPhams { get; set; }
+
     }
 }

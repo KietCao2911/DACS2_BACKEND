@@ -7,13 +7,17 @@ namespace API_DSCS2_WEBBANGIAY.Models
     {
         public PhieuNhap()
         {
-            SanPham  = new HashSet<SanPham>();
+            ChiTietPhieuNhaps = new HashSet<ChiTietPhieuNhap>();
         }
-
+        public int ID { get; set; }
         public string  maPhieuNhap { get; set; }
-        public DateTime NgayNhap { get; set; }
+        public DateTime NgayNhap { get; set; } = DateTime.Now;  
         public string Dvt { get; set; }
-        public virtual ICollection<SanPham> SanPham { get; set; }
+        public decimal TongSoLuong { get; set; }
+        public int SoMatHang { get; set; } = 0;
+        public bool status { get; set; } = false;
+        public decimal VAT { get; set; } = 00;
+        public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; }
 
     }
 }

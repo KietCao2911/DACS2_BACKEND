@@ -53,13 +53,13 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 case "ngay":
                     for(int i =DayStart;i<=DayEnd ;i++)
                     {
-                        var obj = _context.HoaDons.Where(x => x.createdAt.Day == i).Include(x => x.DiaChiNavigation).ToList();
+                        var obj = _context.HoaDons.Where(x => x.createdAt.Day == i).Include(x => x.DiaChiNavigation).Where(x=>x.status==1).ToList();
                         var test = obj.Sum(x=>x.Thanhtien);
                         Dictionary<string ,decimal> rs = new Dictionary<string, decimal> ();
-                        labels.Add("Ngày " + temp.Day);
+                        labels.Add("Ngày " + i);
                         values.Add(test);
                         details.Add(obj);
-                        temp = new DateTime(body.dateStart.Year, body.dateStart.Month , temp.Day + 1);
+                        temp = new DateTime(body.dateStart.Year, body.dateStart.Month ,i);
                         doanhthu += test;
                     }
                            
@@ -68,24 +68,27 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 case "thang":
                     for (int i = MonthStart; i <= MonthEnd; i++)
                     {
-                        var obj = _context.HoaDons.Where(x => x.createdAt.Month == i).Include(x => x.DiaChiNavigation); ;
+                        var obj = _context.HoaDons.Where(x => x.createdAt.Month == i).Include(x => x.DiaChiNavigation).Where(x => x.status == 1); ;
                         var test = obj.Sum(x => x.Thanhtien);
-                        labels.Add("Tháng "+temp.Month);
+                        labels.Add("Tháng "+i);
                         values.Add(test);
-                        temp = new DateTime(DateTime.Now.Year, temp.Month+1, temp.Day );
+                        temp = new DateTime(DateTime.Now.Year, i, temp.Day );
+                        var gg = new DateTime(2001, 12, 1);
                         details.Add(obj);
+                        doanhthu += test;
                     }
 
                     break;
                 case "nam":
                     for (int i = YearStart; i <= YearEnd; i++)
                     {
-                        var obj = _context.HoaDons.Where(x => x.createdAt.Year == temp.Year).Include(x => x.DiaChiNavigation); ;
+                        var obj = _context.HoaDons.Where(x => x.createdAt.Year == temp.Year).Include(x => x.DiaChiNavigation).Where(x => x.status == 1); ;
                         var test = obj.Sum(x => x.Thanhtien);
-                        labels.Add("Năm  " + temp.Year);
+                        labels.Add("Năm  " +i);
                         values.Add(test);
-                        temp = new DateTime(temp.Year + 1, temp.Month, temp.Day);
+                        temp = new DateTime(i, temp.Month, temp.Day);
                         details.Add(obj);
+                        doanhthu += test;
                     }
                     break;
                 default:
@@ -103,7 +106,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPost("bao-cao-xuat-nhap-ton")]
         public async Task<IActionResult> BaoCaoXuatNhapTon(DoanhThuBody body)
         {
-            var values = _context.SoLuongDetails.Include(x => x.IdMauSacNavigation).Include(x => x.IdSizeNavigation).Include(x => x.IdSanPhamNavigation).ThenInclude(x=>x.PhieuNhapNavigation).Where(x => x.IdSanPhamNavigation.PhieuNhapNavigation.NgayNhap >= body.dateStart && x.IdSanPhamNavigation.PhieuNhapNavigation.NgayNhap <= body.dateEnd);
+            var values = _context.ChiTietPhieuNhaps
+                .Include(x=>x.PhieuNhapNavigation)
+                .Where(x => x.PhieuNhapNavigation.NgayNhap > body.dateStart && x.PhieuNhapNavigation.NgayNhap <= body.dateEnd);
+               
             return Ok(values);
         }
     }

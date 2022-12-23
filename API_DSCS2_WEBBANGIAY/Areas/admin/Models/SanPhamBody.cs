@@ -7,7 +7,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Models
     {
         public SanPham sanpham { get; set; }
         public MauSac mausac { get; set; }
-        public Size size { get; set; }
+        //public Size size { get; set; }
 
     }
 }

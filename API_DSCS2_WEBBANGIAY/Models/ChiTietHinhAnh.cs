@@ -9,6 +9,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
     public partial class ChiTietHinhAnh
     {
         public string MaSanPham { get; set; }
+
+        public int IDSanPham { get; set; }
         public int IdHinhAnh { get; set; }
         public string IdMaMau { get; set; }
         private IFormFile? file;

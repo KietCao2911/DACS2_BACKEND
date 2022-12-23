@@ -8,7 +8,9 @@ namespace API_DSCS2_WEBBANGIAY.Models
     public partial class ReviewStar
     {
         public int Id { get; set; }
-        public string MasanPham { get; set; }
+        public string MaSanPham { get; set; }
+
+        public int IDSanPham { get; set; }
         public int? MotSao { get; set; }
         public int? HaiSao { get; set; }
         public int? BaSao { get; set; }

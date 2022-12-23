@@ -9,7 +9,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
     {
         public Sale()
         {
-            ChiTietSales = new HashSet<ChiTietSale>();
+            //ChiTietSales = new HashSet<ChiTietSale>();
         }
 
         public int Id { get; set; }
@@ -20,6 +20,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public DateTime? NgayKetThuc { get; set; }
         public int Giamgia { get; set; }
 
-        public virtual ICollection<ChiTietSale> ChiTietSales { get; set; }
+        //public virtual ICollection<ChiTietSale> ChiTietSales { get; set; }
     }
 }

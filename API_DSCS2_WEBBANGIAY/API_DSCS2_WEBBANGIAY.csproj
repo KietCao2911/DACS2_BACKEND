@@ -5,16 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Utils\Mail\index.html" />
-    <None Remove="Utils\Mail\style.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Utils\Mail\index.html" />
-    <Content Include="Utils\Mail\style.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MailKit" Version="3.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.17" />
@@ -40,6 +30,7 @@
     <Folder Include="Areas\admin\Data\" />
     <Folder Include="Areas\admin\Views\" />
     <Folder Include="wwwroot\res\BstImgs\" />
+    <Folder Include="wwwroot\res\users\" />
     <Folder Include="wwwroot\res\SanPhamRes\Thumb\" />
   </ItemGroup>
 

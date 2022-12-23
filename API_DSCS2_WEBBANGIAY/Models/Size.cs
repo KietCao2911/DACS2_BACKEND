@@ -9,13 +9,14 @@ namespace API_DSCS2_WEBBANGIAY.Models
     {
         public Size()
         {
-            SoLuongDetails = new HashSet<SoLuongDetails>();
-            
+            ChiTietHoaDons = new HashSet<ChiTietHoaDon>();
+            SanPhams= new HashSet<SanPham>();   
         }
 
-        public int Id { get; set; }
-        public int Size1 { get; set; }
-        public virtual ICollection<SoLuongDetails> SoLuongDetails { get; set; }
+        public string Id { get; set; }
+        public string Size1 { get; set; }
+        public virtual ICollection<ChiTietHoaDon> ChiTietHoaDons { get; set; }
+        public virtual ICollection<SanPham> SanPhams { get; set; }
         
     }
 }

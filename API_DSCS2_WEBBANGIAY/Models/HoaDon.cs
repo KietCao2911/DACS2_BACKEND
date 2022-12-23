@@ -23,6 +23,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public int? IdDiaChi    { get; set; }
         public int status { get; set; }
         public int totalQty { get; set; }
+        public int DeliveryStatus { get; set; }
         public DateTime createdAt   { get; set; }
         public DateTime updatedAt { get; set; }
         public virtual TaiKhoan TenTaiKhoanNavigation { get; set; }

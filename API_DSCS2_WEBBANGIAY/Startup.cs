@@ -1,3 +1,4 @@
+using API_DSCS2_WEBBANGIAY.Hubs;
 using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils.Mail;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -68,13 +69,15 @@ namespace API_DSCS2_WEBBANGIAY
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
-            services.AddScoped<ShoesEcommereContext>();
+
+            services.AddTransient<ShoesEcommereContext>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API_DSCS2_WEBBANGIAY", Version = "v1" });
             });
             services.AddTransient<IMailService, MailService>();
             services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,12 +99,12 @@ namespace API_DSCS2_WEBBANGIAY
                 RequestPath = "/wwwroot"
             });
             app.UseSession();
-            app.UseCors("MyAllowSpecificOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseStaticFiles();
-
+           
+            app.UseCors("MyAllowSpecificOrigins");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -109,7 +112,8 @@ namespace API_DSCS2_WEBBANGIAY
           pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}"
         );
                 endpoints.MapControllers();
-                
+                endpoints.MapHub<RoomMessageHub>("/ChatRoom");
+
             });
         }
     }

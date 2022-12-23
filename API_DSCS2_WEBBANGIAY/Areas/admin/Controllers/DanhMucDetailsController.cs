@@ -124,12 +124,12 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var ID = dm.Id;
                 if (parentID<=-1)
                 {
-                    _context.DanhMucDetails.Add(new DanhMucDetails() { maSP = maSP, danhMucId = ID });
+                    _context.DanhMucDetails.Add(new DanhMucDetails() { IDSanPham = ID, danhMucId = ID });
                     _context.SaveChanges();
                     return 0;
                 }
                 var parent = _context.DanhMucs.FirstOrDefault(x => x.Id == parentID);
-                _context.DanhMucDetails.Add(new DanhMucDetails() { maSP = maSP, danhMucId = ID });
+                _context.DanhMucDetails.Add(new DanhMucDetails() { IDSanPham = ID, danhMucId = ID });
                  _context.SaveChanges();
                 return TestFnc( ref parent, maSP);
             }
