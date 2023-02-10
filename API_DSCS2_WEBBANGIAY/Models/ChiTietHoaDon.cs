@@ -19,6 +19,5 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual HoaDon IdHoaDonNavigation { get; set; }
         public virtual SanPham MasanPhamNavigation { get; set; }
         public virtual MauSac MausacPhamNavigation { get; set; }
-        //public virtual Size SizePhamNavigation { get; set; }
     }
 }

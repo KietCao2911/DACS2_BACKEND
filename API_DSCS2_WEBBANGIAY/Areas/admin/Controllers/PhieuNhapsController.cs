@@ -87,19 +87,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(phieuNhap);
             }
-            catch (DbUpdateException)
+            catch (Exception err)
             {
-                if (PhieuNhapExists(phieuNhap.maPhieuNhap))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(err.Message);
             }
 
-            return CreatedAtAction("GetPhieuNhap", new { id = phieuNhap.maPhieuNhap }, phieuNhap);
         }
 
         // DELETE: api/PhieuNhaps/5

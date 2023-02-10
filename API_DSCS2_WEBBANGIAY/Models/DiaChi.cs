@@ -8,6 +8,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             HoaDons = new HashSet<HoaDon>();
             Branchs = new HashSet<Branchs>();
+            NhaCungCaps = new HashSet<NCC>();
         }
         public int ID { get; set; }
         public int? IDKH { get; set; } //bỏ
@@ -26,5 +27,6 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual TaiKhoan TaiKhoanNavigation { get; set; }
         public virtual ICollection<HoaDon> HoaDons { get; set; }
         public virtual ICollection<Branchs> Branchs { get; set; }
+        public virtual ICollection<NCC> NhaCungCaps { get; set; }
     }
 }

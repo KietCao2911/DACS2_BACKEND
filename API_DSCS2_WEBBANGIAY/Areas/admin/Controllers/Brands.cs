@@ -1,11 +1,14 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("admin")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class Brands : ControllerBase
     {
@@ -18,7 +21,22 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(_context.Brands);
+            var brands = _context.Brands.ToList();
+            return Ok(brands);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Post(Brand brand)
+        {
+            try
+            {
+                _context.Brands.Add(brand);
+                await _context.SaveChangesAsync();
+                return Ok(brand);
+            }
+            catch (Exception err)
+            {
+                return BadRequest(err.Message);
+            }
         }
     }
 }

@@ -12,7 +12,8 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
         public int ID { get; set; }
         public string Name { get; set; } = "";
-        public int giaTri { get; set; } = 0;
+        public int giaTriThueDauVao { get; set; } = 0;
+        public int giaTriThueDauRa { get; set; } = 0;
         public virtual ICollection<SanPham> SanPhams { get; set; }
 
     }

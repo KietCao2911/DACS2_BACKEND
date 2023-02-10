@@ -17,7 +17,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             ChiTietPhieuNhaps = new HashSet<ChiTietPhieuNhap>();
             RoomMessages = new HashSet<RoomMessage>();
             SanPhams = new HashSet<SanPham>();
-
+            KhoHangs = new HashSet<ChiNhanh_SanPham>();
         }
 
         //public string MaSanPham { get; set; }
@@ -31,13 +31,16 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public decimal? GiaNhap { set; get; } = 0;
         public decimal? GiaBanLe { set; get; } = 0;
         public decimal? GiaBanSi { set; get; } = 0;
+        public int? SoLuongTon { set; get; } = 0;
+        public int? SoLuongCoTheban { set; get; } = 0;
+        public decimal? GiaVon { set; get; } = 0;
         public string Mota { get; set; }
-        public int? IDType { get; set; }
-        public int? IDBrand { get; set; }
-        public int? IDVat { get; set; }
-        public string? IDSize { get; set; }
-        public string? IDColor { get; set; }
-        public int? IDAnh { get; set; }
+        public int? IDType { get; set; } = null;
+        public int? IDBrand { get; set; } = null;
+        public int? IDVat { get; set; } = null;
+        public string? IDSize { get; set; } = null;
+        public string? IDColor { get; set; } = null;
+        public int? IDAnh { get; set; } = null;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public virtual BoSuuTap IdBstNavigation { get; set; }
@@ -56,6 +59,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; }
         public virtual ICollection<SanPham>SanPhams { get; set; }
         public virtual ICollection<RoomMessage> RoomMessages { get; set; }
+        public virtual ICollection<ChiNhanh_SanPham> KhoHangs { get; set; }
         public string VND(decimal money)
         {
             var format = System.Globalization.CultureInfo.GetCultureInfo("vi-VN");

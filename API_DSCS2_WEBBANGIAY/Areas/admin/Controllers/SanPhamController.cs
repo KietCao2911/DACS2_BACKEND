@@ -39,14 +39,27 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     var getID = await _context.DanhMucs.FirstOrDefaultAsync(x => x.Slug == id);
                     products = _context.SanPhams.
                        Include(x => x.IdBstNavigation).
-                       Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
-                       .Include(x => x.DanhMucDetails).Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id));
+                       Include(x => x.ChiTietHinhAnhs).
+                       ThenInclude(x => x.IdHinhAnhNavigation)
+                       .Include(x=>x.SanPhams).ThenInclude(x=>x.ChiTietHinhAnhs)
+                       .Include(x=>x.TypeNavigation)
+                       .Include(x=>x.BrandNavigation)
+                       .Include(x=>x.VatNavigation)
+                       .Include(x => x.DanhMucDetails)
+                       .Where(x => x.DanhMucDetails.Any(x => x.danhMucId == getID.Id)).Include(x => x.SizeNavigation).Where(x=>x.ParentID==null);
                 }
                 else
                 {
                     products = _context.SanPhams.
-                      Include(x => x.IdBstNavigation).
-                      Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation);
+                      Include(x => x.IdBstNavigation)
+                      .Include(x=>x.MauSacNavigation)
+                      .Include(x=>x.SizeNavigation)
+                      .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs)
+                      .Include(x => x.VatNavigation)
+                      .Include(x => x.TypeNavigation)
+                      .Include(x => x.BrandNavigation).
+                      Include(x => x.ChiTietHinhAnhs)
+                      .ThenInclude(x => x.IdHinhAnhNavigation).Where(x => x.ParentID == null);
                   
                 }
                 if (s is not null && s.Length > 0)
@@ -77,30 +90,36 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 var select = result.Select(x => new
                 {
                     Id = x?.Id,
-                    TenSanPham = x?.TenSanPham,
+                    MaSanPham=x.MaSanPham.Trim(),
+                    TenSanPham = x?.TenSanPham.Trim(),
                     GiaBan = x?.GiaBanLe,
                     GiamGia = x?.GiamGia,
                     Slug = x?.Slug,
                     BoSuuTap = x.IdBstNavigation,
-                  
-                    Color = x.ChiTietHinhAnhs?.GroupBy(x => x.IdMaMau).Select(x => new
+                    IDVAT = x.IDVat,
+                    VAT = x?.VatNavigation,
+                    HinhAnhs = x?.ChiTietHinhAnhs.Select(x => new
                     {
-                        IdMaumau = x.First().IdMaMau,
-                        HinhAnhInfo = x.Select(x => new
-                        {
-                            uid = x.IdHinhAnh,
-                            name = x.IdHinhAnhNavigation.FileName,
-                            status = "done",
-                            url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.IDSanPham + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
-                        })
-                    }),
-                   
-
-
+                        uid = x.IdHinhAnh,
+                        name = x.IdHinhAnhNavigation.FileName,
+                        status = "done",
+                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim(),
+                        IdMaMau = x.IdMaMau,
+                    }).GroupBy(x => x.IdMaMau),
+                    SoLuongTon = x.SoLuongTon,
+                    CoTheBan = x.SoLuongCoTheban,
+                    LoaiHang = x?.TypeNavigation,
+                    NhanHieu = x?.BrandNavigation,
+                    MauSac = x?.MauSacNavigation,
+                    KichThuoc = x?.SizeNavigation,
+                    IDType = x?.IDType,
+                    IDBrand = x?.IDBrand,
+                    SanPhams= x.SanPhams,
+                    
                 }); ; ;
                 return Ok(new
                 {
-                    products = select,
+                    products=select,
                     totalRow = products.Count(),
                 });
             }
@@ -115,10 +134,19 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [Route("san-pham/{slug}")]
         public async Task<ActionResult<SanPham>> GetSanPham(string slug)
         {
-            var sanPham = await _context.SanPhams.Include(x => x.IdBstNavigation).Include(x=>x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
-              /*.ThenInclude(x=>x.IdSizeNavigation)*/.Include(x=>x.DanhMucDetails).
-                ThenInclude(x=>x.IdDanhMucNavigation).FirstOrDefaultAsync(x=>x.Slug.Trim()==slug.Trim());
+            var sanPham = await _context.SanPhams.
 
+                      Include(x => x.IdBstNavigation).Include(x => x.SanPhams).
+                      ThenInclude(x=>x.SizeNavigation)
+                      .Include(x => x.SanPhams)
+                      .ThenInclude(x => x.MauSacNavigation)
+                       .Include(x => x.SanPhams)
+                       .ThenInclude(x=>x.KhoHangs)
+                       .ThenInclude(x=>x.LichSuNhapXuatHangNavigation)
+                       .Include(x => x.VatNavigation)
+                      .Include(x => x.TypeNavigation)
+                      .Include(x => x.BrandNavigation).
+                       Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).FirstOrDefaultAsync(x=>x.Slug.Trim()==slug.Trim()&&x.ParentID==null);
             if (sanPham == null)
             {
                 return NotFound();
@@ -127,150 +155,132 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             return Ok(new
             {
                 Id = sanPham?.Id,
-                TenSanPham = sanPham?.TenSanPham,
-                GiaBanDisplay = sanPham?.VND((decimal)sanPham?.GiaBanLe),
+                MaSanPham = sanPham.MaSanPham.Trim(),
+                TenSanPham = sanPham?.TenSanPham.Trim(),
                 GiaBan = sanPham?.GiaBanLe,
-                GiamGia=sanPham?.GiamGia,
-                Mota = sanPham.Mota,
-                BoSuuTap = new
+                GiamGia = sanPham?.GiamGia,
+                Slug = sanPham?.Slug,
+                BoSuuTap = sanPham.IdBstNavigation,
+                SoLuongTon = sanPham.SoLuongTon,
+                CoTheBan = sanPham.SoLuongCoTheban,
+                LoaiHang = sanPham?.TypeNavigation,
+                NhanHieu = sanPham?.BrandNavigation,
+                VAT = sanPham?.VatNavigation,
+                IDType = sanPham?.IDType,
+                IDBrand= sanPham?.IDBrand,
+                IDVAT = sanPham?.IDVat,
+                HinhAnhs = sanPham?.ChiTietHinhAnhs.Select(x => new
                 {
-                    key = sanPham?.IdBstNavigation?.Id,
-                    value = sanPham?.IdBstNavigation?.TenBoSuuTap
-                },
-                HinhAnh = sanPham?.ChiTietHinhAnhs.Select(x => new
-                {
-                    key = x.IdHinhAnhNavigation?.Id,
-                    value = x.IdHinhAnhNavigation?.FileName.Trim(),
-                }),
-              
-                DanhMuc = sanPham.DanhMucDetails.Select(x => new
-                {
-                    IdDanhMuc = x.IdDanhMucNavigation.Id,
-                    ParentId = x.IdDanhMucNavigation.ParentCategoryID,
-                    TenDanhMuc = x.IdDanhMucNavigation.TenDanhMuc
-                }),
-                Color = sanPham.ChiTietHinhAnhs?.GroupBy(x => x.IdMaMau).Select(x => new
-                {
-                    IdMaumau = x.First().IdMaMau,
-                    HinhAnhInfo = x.Select(x => new
-                    {
-                        uid = x.IdHinhAnh,
-                        name=x.IdHinhAnhNavigation.FileName,
-                        status="done",
-                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.IDSanPham+ "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim()
-                    })
-                })
-
-            }); ;
+                    uid = x.IdHinhAnh,
+                    name=x.IdHinhAnhNavigation.FileName,
+                    status="done",
+                    url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim(),
+                    IdMaMau = x.IdMaMau,
+                }).GroupBy(x => x.IdMaMau)
+                ,SanPhams = sanPham.SanPhams,
+            });; ;
         }
 
         // PUT: api/SanPham/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSanPham(int id, SanPham sanPham)
+        [HttpPut]
+        public async Task<IActionResult> PutSanPham( SanPham sanPham)
         {
-            var sp = await _context.SanPhams.FirstOrDefaultAsync(x => x.Id == sanPham.Id);
-            sanPham.Slug = CustomSlug.Slugify(sanPham.TenSanPham);
-            if (id != sanPham.Id)
-            {
-                return BadRequest();
-            }
-            if (sanPham.GiamGia != 0)
-            {
-                if(sp.GiamGia>0)
-                {
-                    var giaGoc = (decimal)sp.GiaBanLe / ((decimal)(100 - sp.GiamGia)/100);
-                    var giaGiam= giaGoc * ((decimal)(100 - sanPham.GiamGia) / 100);
-                    sanPham.GiaBanLe = (decimal)giaGiam;
-                }
-                else
-                {
-                    var phantram = (decimal)(100 - sanPham.GiamGia) / 100 ;
-                    var giaGiam = (decimal)(sanPham.GiaBanLe * phantram);
-                    sanPham.GiaBanLe = giaGiam;
-                }
-            }
-            else
-            {
-                if (sp.GiamGia > 0)
-                {
-                    var giaGoc = (decimal)sp.GiaBanLe / ((decimal)(100 - sp.GiamGia) / 100);
-                    var giaGiam = giaGoc * ((decimal)(100 - sanPham.GiamGia) / 100);
-                    sanPham.GiaBanLe = (decimal)giaGiam;
-                }
-                else
-                {
-                    var phantram = (decimal)(100 - sanPham.GiamGia) / 100;
-                    var giaGiam = (decimal)(sanPham.GiaBanLe * phantram);
-                    sanPham.GiaBanLe = giaGiam;
-                }
-            }
-            _context.Entry(sanPham).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SanPhamExists(id))
+                foreach(var product in sanPham.SanPhams)
                 {
-                    return NotFound();
+                    _context.Entry(product).State = EntityState.Modified;
                 }
-                else
-                {
-                    throw;
-                }
+                _context.Entry(sanPham).State = EntityState.Modified;
+                _context.SaveChanges();
+                return Ok();
             }
-
-            return Ok(new
+            catch(Exception err)
             {
-                success=true,
-            });
+                return BadRequest(err.Message);
+            }
         }
 
         // POST: api/SanPham
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<SanPham>> PostSanPham(PostSanPhamRequest body)
+        public async Task<ActionResult<SanPham>> PostSanPham(SanPham body)
         {
+            var trans = _context.Database.BeginTransaction();
+            ChiNhanh_SanPham khohang = new ChiNhanh_SanPham();
             try
             {
-                var slug = CustomSlug.Slugify(body.product.TenSanPham) + "_" + body.product.Id;
-                body.product.Slug = slug;
-                _context.SanPhams.Add(body.product);
-                await _context.SaveChangesAsync();
-                if(body.productVersions.Count>0)
+                
+                if(body.MaSanPham==null || body.MaSanPham.Length==0)
                 {
-                    foreach(var version in body.productVersions)
-                    {
-                        var maSP = version.MaSanPham is null || version.MaSanPham.Length <= 0 ? "CTK" + version.Id : version.MaSanPham;
-                        version.MaSanPham = maSP;
-                        version.ParentID = body.product.MaSanPham;
-                        _context.SanPhams.Add(version);
-                    }
-                await _context.SaveChangesAsync();
-                    return Ok();
-                }
-                else
-                {
-                    var maSP = body.maSP.Length>0||body.maSP is not null?body.maSP: "CTK" + body.product.Id;
-        
+                    var ID = new GenKey();
+                    _context.Keys.Add(ID);
                     await _context.SaveChangesAsync();
-                    return Ok();
+                    body.MaSanPham = "CTK0"+ ID.ID.ToString();
+                    body.Slug = CustomSlug.Slugify(body.TenSanPham) + "_" + body.MaSanPham;
+                    khohang.MaSanPham = body.MaSanPham;
+                    khohang.MaChiNhanh = "CN01";
+                    var history = new LichSuNhapXuatHang();
+                    history.Name = "Khởi tạo version";
+                    _context.LichSuNhapHangs.Add(history);
+                    await _context.SaveChangesAsync();
+                    khohang.IDLichSu = history.ID;
                 }
+                var products = body.SanPhams.ToList();
+               if(products.Count>0)
+                {
+                    for (int i = 0; i < body.SanPhams.Count; i++)
+                    {
+                        if (products[i].MaSanPham == null || products[i].MaSanPham.Length == 0)
+                        {
+                            var ID = new GenKey();
+                            var history = new LichSuNhapXuatHang();
+                            history.Name = "Khởi tạo version";
+                            _context.Keys.Add(ID);
+                            _context.LichSuNhapHangs.Add(history);
+                            await _context.SaveChangesAsync();
+                            products[i].IDVat = body.IDVat;
+                            products[i].IDBrand = body.IDBrand;
+                            products[i].IDType = body.IDType;
+                            products[i].MaSanPham = "CTK0" + ID.ID.ToString();
+                            products[i].ParentID = body.MaSanPham;
+                            products[i].Slug = CustomSlug.Slugify(products[i].TenSanPham) + "_" + products[i].MaSanPham;
+                            products[i].KhoHangs.Add(new ChiNhanh_SanPham()
+                            {
+                                SoLuongTon =  products[i].SoLuongTon,
+                                SoLuongCoTheban = products[i].SoLuongCoTheban,
+                                SoLuongHangDangGiao = 0,
+                                SoLuongHangDangVe=0,
+                                GiaVon = products[i]?.GiaVon,    
+                                IDLichSu = history.ID,
+                                MaSanPham = products[i].MaSanPham,
+                                MaChiNhanh ="CN01" /*body.KhoHangs.ToArray()[0].MaChiNhanh*/,
+                            });
+                        }
+                    }
+                }
+                body.KhoHangs =new List<ChiNhanh_SanPham>();
+                _context.SanPhams.Add(body);
+                _context.KhoHangs.Add(khohang);
+                await _context.SaveChangesAsync();
+                await trans.CommitAsync();
+                return Ok(body);
             }
-            catch (Exception ex)
+            catch (Exception err)
             {
-                return BadRequest(ex.Message);
+                await  trans.RollbackAsync();
+                return BadRequest(err);
             }
+
         }
 
         // DELETE: api/SanPham/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSanPham(int id)
+        [HttpDelete("{maSanPham}")]
+        public async Task<IActionResult> DeleteSanPham(string maSanPham)
         {
-            var sanPham = await _context.SanPhams.FindAsync(id);
+            var sanPham = await _context.SanPhams.Include(x=>x.SanPhams).FirstOrDefaultAsync(x=>x.MaSanPham== maSanPham);
            
             if (sanPham == null)
             {
@@ -278,15 +288,19 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             try {
                 var path = Path.Combine(
-                   Directory.GetCurrentDirectory(), "wwwroot//res//SanPhamRes//Imgs//" + sanPham.Id);
-                Directory.Delete(path, true);
+                  Directory.GetCurrentDirectory(), "wwwroot//res//SanPhamRes//Imgs//" + sanPham.MaSanPham.Trim());
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, true);
+                }
+                _context.SanPhams.RemoveRange(sanPham.SanPhams);
                 _context.SanPhams.Remove(sanPham);
                 await _context.SaveChangesAsync();
                 return Ok();
             }
             catch(Exception err)
             {
-                return BadRequest();
+                return BadRequest(err.Message);
             }
         }
 
@@ -352,7 +366,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             return BadRequest();
         }
         [HttpDelete("RemoveImg")]
-        public async Task<IActionResult>RemoveImg(string fileName, int _id,int maSP,string maMau)
+        public async Task<IActionResult>RemoveImg(string fileName, int _id,string maSP,string maMau)
         {
             if (fileName != null)
             {
@@ -366,10 +380,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     if (file.Exists)
                     {
                         file.Delete();
-                        var hinhAnh = await _context.ChiTietHinhAnhs.FirstOrDefaultAsync(x=>x.IDSanPham==maSP&&x.IdMaMau == maMau&&x.IdHinhAnh == _id);
+                        var hinhAnh = await _context.HinhAnhs.FindAsync(_id);
                         if (hinhAnh != null)
                         {
-                            _context.ChiTietHinhAnhs.Remove(hinhAnh);
+                            _context.HinhAnhs.Remove(hinhAnh);
                             await _context.SaveChangesAsync();
                             return Ok(new
                             {
@@ -377,70 +391,86 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                                 path = path
                             }); ;
                         }
+                        else
+                        {
+                            return BadRequest();
+                        }
+                    }
+                    else
+                    {
                         return BadRequest();
+
                     }
                 }
                 catch(Exception err)
                 {
                     return BadRequest();
                 }
-               
+
             }
+            else
+            {
+
             return BadRequest();
+            }
         }
-        [HttpPost("Upload-Mutiple/{MaSP}/{MaMau}")]
-        public async Task<IActionResult> UploadMutiple(IFormFile file, int IDSanPham,string MaMau)
+        [HttpPost("Upload/{MaSP}/{MaMau}")]
+        public async Task<IActionResult> Upload(IFormFile file, string maSP,string MaMau)
         {
             if (file is null) return BadRequest();
-  
-                    var folder = "wwwroot//res//SanPhamRes//Imgs//" + IDSanPham + "//"+MaMau+"//";
-                    var path = Path.Combine(
-              Directory.GetCurrentDirectory(), folder,
-              file.FileName);
-                    if(!Directory.Exists(path))
-                    {
-                        Directory.CreateDirectory(folder);
-                    }
-                    else
+
+            var folder = "wwwroot/res/SanPhamRes/Imgs/" + maSP + "/" + MaMau + "/";
+            var path = Path.Combine(
+      Directory.GetCurrentDirectory(), folder,
+      file.FileName);
+            if (!Directory.Exists(path))
             {
-                return BadRequest("fileName existed");
+                Directory.CreateDirectory(folder);
             }
-                    using (var stream = new FileStream(path, FileMode.Create))
-                    {
-                        try
-                        {
-                            await file.CopyToAsync(stream);
-                            HinhAnh anh = new HinhAnh();
-                            ChiTietHinhAnh hinhAnhSanPham = new ChiTietHinhAnh();
-                            anh.FileName = file.FileName;
-                            _context.HinhAnhs.Add(anh);
-                            await _context.SaveChangesAsync();
-                            hinhAnhSanPham.IdHinhAnh = anh.Id;
-                            hinhAnhSanPham.IDSanPham = IDSanPham;
-                            hinhAnhSanPham.IdMaMau = MaMau; 
-                            _context.ChiTietHinhAnhs.Add(hinhAnhSanPham);
-                            await _context.SaveChangesAsync();
+            if (System.IO.File.Exists(path))
+            {
+                return BadRequest("Đã tồn tại hình ảnh này!");
+            }
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                var trans = _context.Database.BeginTransaction();
+                try
+                {
+                    await file.CopyToAsync(stream);
+                    HinhAnh anh = new HinhAnh();
+                    anh.FileName = file.FileName;
+                    _context.HinhAnhs.Add(anh);
+                    await _context.SaveChangesAsync();
+                    ChiTietHinhAnh hinhAnhSanPham = new ChiTietHinhAnh();
+                    hinhAnhSanPham.IdHinhAnh = anh.Id;
+                    hinhAnhSanPham.MaSanPham = maSP;
+                    hinhAnhSanPham.IdMaMau = MaMau;
+                    _context.ChiTietHinhAnhs.Add(hinhAnhSanPham);
+                    await _context.SaveChangesAsync();
+                    await trans.CommitAsync();
                     return Ok(new
                     {
+                        idMaMau = hinhAnhSanPham.IdMaMau.Trim(),
                         uid = hinhAnhSanPham.IdHinhAnh,
                         name = file.FileName,
                         status = "done",
-                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + hinhAnhSanPham.IDSanPham + "\\" + hinhAnhSanPham.IdMaMau + "\\" + file.FileName.Trim()
+                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + hinhAnhSanPham.MaSanPham + "\\" + hinhAnhSanPham.IdMaMau + "\\" + file.FileName.Trim()
                     });
 
                 }
-                        catch (Exception err)
-                        {
-                            return BadRequest(new
-                            {
-                                success = false
-                            });
-                        }
+                catch (Exception err)
+                {
+                   await  trans.RollbackAsync();
+                    return BadRequest(new
+                    {
+                        success = false
+                    });
+                }
 
-                    }
+            }
 
 
-          
+
         }
         [HttpDelete("Remove-Mutiple")]
         public async Task<IActionResult> RemoveMutiple(string fileName, string _id)

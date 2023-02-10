@@ -15,8 +15,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string Dvt { get; set; }
         public decimal TongSoLuong { get; set; }
         public int SoMatHang { get; set; } = 0;
-        public bool status { get; set; } = false;
+        public int status { get; set; } = 0;
         public decimal VAT { get; set; } = 00;
+        public decimal? DaThanhToan { get; set; } = 0;
+
         public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; }
 
     }

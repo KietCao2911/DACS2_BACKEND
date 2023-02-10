@@ -40,6 +40,10 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<Brand> Brands { get; set; }
         public virtual DbSet<VAT> Vats { get; set; }
         public virtual DbSet<Branchs> Branchs { get; set; }
+        public virtual DbSet<GenKey> Keys { get; set; }
+        public virtual DbSet<ChiNhanh_SanPham> KhoHangs{ get; set; }
+        public virtual DbSet<NCC> NhaCungCap{ get; set; }
+        public virtual DbSet<LichSuNhapXuatHang> LichSuNhapHangs{ get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -60,12 +64,35 @@ namespace API_DSCS2_WEBBANGIAY.Models
             //    entity.Property(e => e.Id).ValueGeneratedOnAdd();
             //    entity.Property(e => e.RoleName).HasColumnType("nvarchar(30)");
             //});
-            //modelBuilder.Entity<RoleDetails>(entity =>
-            //{
-            //    entity.HasKey(e => new { e.Id, e.IdRoleNavigation, e.TenTaiKhoanNavigation });
-            //    entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(e =>e.RoleDetails ).HasForeignKey(x => x.TenTaiKhoan).OnDelete(DeleteBehavior.Cascade); ;
-            //    entity.HasOne(e => e.TenTaiKhoanNavigation).WithMany(e => e.RoleDetails).HasForeignKey(x => x.IdRole).OnDelete(DeleteBehavior.Cascade); ;
-            //});
+
+            modelBuilder.Entity<NCC>(entity =>
+            {
+                entity.HasKey(e => e.ID);
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+                entity.Property(e => e.Name).HasColumnType("nvarchar(50)");
+                entity.Property(e => e.Phone).HasColumnType("char(10)");
+                entity.Property(e => e.Email).HasColumnType("char(50)");
+                entity.HasOne(e => e.DiaChiNavigation).WithMany(e => e.NhaCungCaps).HasForeignKey(x => x.IDDiaChi).OnDelete(DeleteBehavior.Cascade); ;
+            });
+            modelBuilder.Entity<LichSuNhapXuatHang>(entity =>
+            {
+                entity.HasKey(e =>e.ID);
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+                entity.Property(e => e.Name).HasColumnType("nvarchar(255)");
+            });
+            modelBuilder.Entity<ChiNhanh_SanPham>(entity =>
+            {
+                entity.HasKey(e => new { e.MaChiNhanh ,e.MaSanPham,e.IDLichSu});
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+                entity.HasOne(e => e.SanPhamNavigation).WithMany(e => e.KhoHangs).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasOne(e => e.BranchNavigation).WithMany(e => e.KhoHangs).HasForeignKey(x => x.MaChiNhanh).OnDelete(DeleteBehavior.Cascade); ;
+                entity.HasOne(e => e.LichSuNhapXuatHangNavigation).WithMany(e => e.KhoHangs).HasForeignKey(x => x.IDLichSu).OnDelete(DeleteBehavior.Cascade); ;
+            });
+            modelBuilder.Entity<GenKey>(entity =>
+            {
+                entity.Property(e => e.ID);
+                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+            });
             modelBuilder.Entity<Size>(entity =>
             {
                 entity.Property(e => e.Id);
@@ -117,11 +144,12 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
             modelBuilder.Entity<ChiTietPhieuNhap>(entity =>
             {
-                entity.HasKey(e => new {  e.MaSanPham ,e.IDPN});
+                entity.HasKey(e => new {  e.MaSanPham ,e.IDPN,e.MaChiNhanh});
                 //entity.Property(e => e.maSP).HasColumnType("char(10)");
                 entity.Property(e => e.Id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); ;
                 entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietPhieuNhaps).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(e => e.PhieuNhapNavigation).WithMany(x => x.ChiTietPhieuNhaps).HasForeignKey(x => x.IDPN).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.KhoHangNavigation).WithMany(x => x.PhieuNhaps).HasForeignKey(x => x.MaChiNhanh).OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<PhieuNhap>(entity=>
             {
@@ -490,7 +518,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             {
                 entity.HasKey(e => new {e.MaSanPham})
                     .HasName("pk_sanpham");
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
                 entity.Property(e => e.MaSanPham).HasColumnType("char(10)");
                 entity.ToTable("SanPham");
                 entity.HasIndex(e => e.IdBst, "IX_SanPham__id_BST");
@@ -505,7 +533,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
 
                 entity.Property(e => e.TenSanPham)
                     .IsRequired()
-                    .HasMaxLength(50);
+                    .HasMaxLength(255);
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("getdate()");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("getdate()");
                 entity.HasOne(d => d.IdBstNavigation)
@@ -515,7 +543,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
                     .HasConstraintName("fk_sanpham_BST");
                 entity.HasOne(x => x.TypeNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDType).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(x => x.BrandNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDBrand).OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(x => x.VatNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDBrand).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(x => x.VatNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDVat).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(x => x.SanPhamNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.ParentID);
                 entity.HasOne(x => x.SizeNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDSize).OnDelete(DeleteBehavior.Cascade); ;
                 entity.HasOne(x => x.HinhAnhNavigation).WithMany(e => e.SanPhams).HasForeignKey(x => x.IDAnh);

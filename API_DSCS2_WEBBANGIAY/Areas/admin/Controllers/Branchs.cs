@@ -1,11 +1,13 @@
 ﻿using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
-    [Route("api/[controller]")]
+    [Area("admin")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class Branchs : ControllerBase
     {
@@ -18,7 +20,8 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(_context.Branchs);
+            var branchs = _context.Branchs.ToList();
+            return Ok(branchs);
         }
     }
 }
