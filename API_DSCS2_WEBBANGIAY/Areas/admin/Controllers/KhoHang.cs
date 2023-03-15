@@ -24,13 +24,28 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                var khohangs = _context.KhoHangs.Include(x=>x.LichSuNhapXuatHangNavigation).Include(x=>x.BranchNavigation).FirstOrDefault(x => x.MaSanPham == id);
+                var khohangs = _context.KhoHangs.Include(x=>x.BranchNavigation).FirstOrDefault(x => x.MaSanPham == id);
                 return Ok(khohangs);
             }
             catch(Exception err)
             {
                 return BadRequest(err);
             }
+        }
+        [HttpGet("GetProducts/{maChiNhanh}")]
+        public async Task<IActionResult> GetProducts(string maChiNhanh, [FromQuery(Name = "s")] string s)
+        {
+            if(maChiNhanh ==null)
+            {
+                maChiNhanh = "CN01";
+            }
+            var products = _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.SanPhamNavigation).Where(x => x.MaChiNhanh.Trim() == maChiNhanh.Trim()&&x.SanPhamNavigation.ParentID!=null);
+            if (s is not null&&s.Length > 0 )
+            {
+                products = products.Where(x=>x.SanPhamNavigation.TenSanPham.Trim().Contains(s.Trim())); 
+
+            }
+            return Ok(products);
         }
     }
 }

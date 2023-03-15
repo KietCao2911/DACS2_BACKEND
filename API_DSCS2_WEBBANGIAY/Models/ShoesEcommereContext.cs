@@ -43,14 +43,16 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual DbSet<GenKey> Keys { get; set; }
         public virtual DbSet<ChiNhanh_SanPham> KhoHangs{ get; set; }
         public virtual DbSet<NCC> NhaCungCap{ get; set; }
-        public virtual DbSet<LichSuNhapXuatHang> LichSuNhapHangs{ get; set; }
+        public virtual DbSet<PhieuNhapXuat> PhieuNhapXuats { get; set; }
+        public virtual DbSet<ChiTietNhapXuat> ChiTietNhapXuats { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Server=DESKTOP-Q6F43CF;Database=ShoesEcommere;Trusted_Connection=True;MultipleActiveResultSets=true;");
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                optionsBuilder.EnableSensitiveDataLogging();
             }
         }
 
@@ -64,7 +66,32 @@ namespace API_DSCS2_WEBBANGIAY.Models
             //    entity.Property(e => e.Id).ValueGeneratedOnAdd();
             //    entity.Property(e => e.RoleName).HasColumnType("nvarchar(30)");
             //});
+            modelBuilder.Entity<LoaiPhieu>(entity =>
+            {
 
+                entity.HasKey(e => e.MaPhieu);
+                entity.Property(x => x.MaPhieu).HasColumnType("char(10)");
+
+            });
+            modelBuilder.Entity<ChiTietNhapXuat>(entity =>
+            {
+                entity.HasKey(e => new { e.MaSanPham, e.IDPN, e.MaChiNhanh });
+                entity.Property(e => e.DVT).HasColumnType("char(10)");
+                entity.Property(e => e.Id).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); ;
+                entity.HasOne(e => e.SanPhamNavigation).WithMany(x => x.ChiTietNhapXuats).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.PhieuNhapXuatNavigation).WithMany(x => x.ChiTietNhapXuats).HasForeignKey(x => x.IDPN).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.KhoHangNavigation).WithMany(x => x.ChiTietNhapXuats).HasForeignKey(x => x.MaChiNhanh).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<PhieuNhapXuat>(entity =>
+            {
+
+                entity.HasKey(e => e.Id);
+                entity.Property(x => x.createdAt).HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+                entity.HasOne(e => e.NhaCungCapNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.IDNCC).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.LoaiPhieuNavigation).WithMany(x => x.PhieuNhapXuats).HasForeignKey(x => x.LoaiPhieu).OnDelete(DeleteBehavior.Cascade);
+
+            });
             modelBuilder.Entity<NCC>(entity =>
             {
                 entity.HasKey(e => e.ID);
@@ -74,19 +101,12 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.Property(e => e.Email).HasColumnType("char(50)");
                 entity.HasOne(e => e.DiaChiNavigation).WithMany(e => e.NhaCungCaps).HasForeignKey(x => x.IDDiaChi).OnDelete(DeleteBehavior.Cascade); ;
             });
-            modelBuilder.Entity<LichSuNhapXuatHang>(entity =>
-            {
-                entity.HasKey(e =>e.ID);
-                entity.Property(e => e.ID).ValueGeneratedOnAdd();
-                entity.Property(e => e.Name).HasColumnType("nvarchar(255)");
-            });
             modelBuilder.Entity<ChiNhanh_SanPham>(entity =>
             {
-                entity.HasKey(e => new { e.MaChiNhanh ,e.MaSanPham,e.IDLichSu});
-                entity.Property(e => e.ID).ValueGeneratedOnAdd();
+                entity.HasKey(e => new { e.MaChiNhanh ,e.MaSanPham});
+                entity.Property(e => e.ID).ValueGeneratedOnAdd().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore); ; ;
                 entity.HasOne(e => e.SanPhamNavigation).WithMany(e => e.KhoHangs).HasForeignKey(x => x.MaSanPham).OnDelete(DeleteBehavior.Cascade); ;
                 entity.HasOne(e => e.BranchNavigation).WithMany(e => e.KhoHangs).HasForeignKey(x => x.MaChiNhanh).OnDelete(DeleteBehavior.Cascade); ;
-                entity.HasOne(e => e.LichSuNhapXuatHangNavigation).WithMany(e => e.KhoHangs).HasForeignKey(x => x.IDLichSu).OnDelete(DeleteBehavior.Cascade); ;
             });
             modelBuilder.Entity<GenKey>(entity =>
             {
@@ -153,12 +173,13 @@ namespace API_DSCS2_WEBBANGIAY.Models
             });
             modelBuilder.Entity<PhieuNhap>(entity=>
             {
-                entity.Property(x => x.maPhieuNhap).HasColumnType("char(10)");
+           
                 entity.HasKey(e => e.ID);
                 entity.Property(x => x.ID).ValueGeneratedOnAdd();
                 entity.Property(x => x.Dvt).HasColumnType("nvarchar(10)");
                 entity.Property(x => x.NgayNhap).HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
+                entity.HasOne(e => e.NhaCungCapNavigation).WithMany(x => x.PhieuNhaps).HasForeignKey(x=>x.IDNCC).OnDelete(DeleteBehavior.Cascade);
 
             });
             modelBuilder.Entity<DiaChi>(entity =>
@@ -525,15 +546,14 @@ namespace API_DSCS2_WEBBANGIAY.Models
                 entity.Property(e => e.Mota).HasColumnType("ntext");
                 entity.Property(e => e.IdBst).HasColumnName("_id_BST");
                 entity.Property(e => e.Slug)
-                    .HasMaxLength(50)
+                    .HasMaxLength(500)
                     .IsUnicode(false)
                     .HasColumnName("slug")
                     .IsFixedLength(true);
 
 
-                entity.Property(e => e.TenSanPham)
-                    .IsRequired()
-                    .HasMaxLength(255);
+                entity.Property(e => e.TenSanPham).HasColumnType("nvarchar(500)")
+                    .IsRequired();
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("getdate()");
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("getdate()");
                 entity.HasOne(d => d.IdBstNavigation)

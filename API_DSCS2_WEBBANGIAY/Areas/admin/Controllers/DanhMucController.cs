@@ -30,46 +30,9 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             try
             {
-                Dictionary<string, List<DanhMuc>> dic = new Dictionary<string, List<DanhMuc>>();
-                var Bac0 = await _context.DanhMucs.Where(x => x.ParentCategoryID == -1).ToListAsync();
-                var danhmucs = await _context.DanhMucs.ToListAsync();
-                List<DanhMuc> Bac1 = new List<DanhMuc>();
-                List<DanhMuc> Bac2 = new List<DanhMuc>();
-                List<Menu> menu = new List<Menu>();
-                for (int i = 0; i < Bac0.Count; i++)
-                {
-                    Menu Level0 = new Menu();
-                    Level0.info = Bac0[i];
-                    menu.Add(Level0);
-                    var lv1 = danhmucs.Where(x => x.ParentCategoryID == Bac0[i].Id).ToList();
-                    if (lv1.Count > 0)
-                    {
 
-                        for (int item1 = 0; item1 < lv1.Count; item1++)
-                        {
-                            Level1 Level1 = new Level1();
-                            Level1.info = lv1[item1];
-                            menu[i].Children.Add(Level1);
-                            var lv2 = danhmucs.Where(x => x.ParentCategoryID == lv1[item1].Id).ToList();
-                            if (lv2.Count > 0)
-                            {
-
-                                for (int item2 = 0; item2 < lv2.Count; item2++)
-                                {
-                                    Level2 Level2 = new Level2();
-                                    Level2.info = lv2[item2];
-                                    menu[i].Children[item1].Children.Add(Level2);
-                                }
-                            }
-                        }
-
-                    }
-                }
-                return Ok(new
-                {
-                    menu,
-                    danhmucs = danhmucs,
-                });
+                var danhmucs = _context.DanhMucs;
+                return Ok(danhmucs);
             }
             catch(Exception ex)
             {

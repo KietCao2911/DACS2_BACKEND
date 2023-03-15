@@ -9,6 +9,7 @@ using API_DSCS2_WEBBANGIAY.Models;
 using API_DSCS2_WEBBANGIAY.Utils;
 using System.IO;
 using API_DSCS2_WEBBANGIAY.BodyRequest.SanPhamController;
+using Microsoft.Extensions.Configuration;
 
 namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 {
@@ -18,10 +19,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
     public class SanPhamController : ControllerBase
     {
         private readonly ShoesEcommereContext _context;
-
-        public SanPhamController(ShoesEcommereContext context)
+        private IConfiguration _configuration { get; set; }
+        public SanPhamController(ShoesEcommereContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: api/SanPham
@@ -66,11 +68,6 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 {
                     products = products.Where(x => x.TenSanPham.Trim().ToLower().Contains(s.Trim().ToLower()));
                 }
-              
-                if (sale == true)
-                {
-                    products = products.Where(x => x.GiamGia > 0);
-                }
                 switch (sort)
                 {
                     case "price-hight-to-low":
@@ -95,10 +92,10 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                     GiaBan = x?.GiaBanLe,
                     GiamGia = x?.GiamGia,
                     Slug = x?.Slug,
-                    BoSuuTap = x.IdBstNavigation,
+                    IdBstNavigation = x.IdBstNavigation,
                     IDVAT = x.IDVat,
-                    VAT = x?.VatNavigation,
-                    HinhAnhs = x?.ChiTietHinhAnhs.Select(x => new
+                    VatNavigation = x?.VatNavigation,
+                    ChiTietHinhAnhs = x?.ChiTietHinhAnhs.Select(x => new
                     {
                         uid = x.IdHinhAnh,
                         name = x.IdHinhAnhNavigation.FileName,
@@ -107,11 +104,11 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         IdMaMau = x.IdMaMau,
                     }).GroupBy(x => x.IdMaMau),
                     SoLuongTon = x.SoLuongTon,
-                    CoTheBan = x.SoLuongCoTheban,
-                    LoaiHang = x?.TypeNavigation,
-                    NhanHieu = x?.BrandNavigation,
-                    MauSac = x?.MauSacNavigation,
-                    KichThuoc = x?.SizeNavigation,
+                    SoLuongCoTheban = x.SoLuongCoTheban,
+                    TypeNavigation = x?.TypeNavigation,
+                    BrandNavigation = x?.BrandNavigation,
+                    MauSacNavigation = x?.MauSacNavigation,
+                    SizeNavigation = x?.SizeNavigation,
                     IDType = x?.IDType,
                     IDBrand = x?.IDBrand,
                     SanPhams= x.SanPhams,
@@ -119,7 +116,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                 }); ; ;
                 return Ok(new
                 {
-                    products=select,
+                    products=select.Take(pageSize),
                     totalRow = products.Count(),
                 });
             }
@@ -138,47 +135,27 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
                       Include(x => x.IdBstNavigation).Include(x => x.SanPhams).
                       ThenInclude(x=>x.SizeNavigation)
+                      .Include(x=>x.DanhMucDetails)
                       .Include(x => x.SanPhams)
                       .ThenInclude(x => x.MauSacNavigation)
                        .Include(x => x.SanPhams)
-                       .ThenInclude(x=>x.KhoHangs)
-                       .ThenInclude(x=>x.LichSuNhapXuatHangNavigation)
+                       .ThenInclude(x=>x.KhoHangs).ThenInclude(x=>x.BranchNavigation)
+                      .Include(x => x.SanPhams).ThenInclude(x=>x.ChiTietNhapXuats).ThenInclude(x=>x.KhoHangNavigation).
+                      Include(x => x.SanPhams).ThenInclude(x => x.ChiTietNhapXuats).ThenInclude(x=>x.PhieuNhapXuatNavigation).
+                      Include(x => x.SanPhams)
+                       .ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation)
                        .Include(x => x.VatNavigation)
                       .Include(x => x.TypeNavigation)
                       .Include(x => x.BrandNavigation).
-                       Include(x => x.ChiTietHinhAnhs).ThenInclude(x => x.IdHinhAnhNavigation).FirstOrDefaultAsync(x=>x.Slug.Trim()==slug.Trim()&&x.ParentID==null);
+                       Include(x => x.ChiTietHinhAnhs)
+                       .ThenInclude(x => x.IdHinhAnhNavigation)
+                       .FirstOrDefaultAsync(x=>x.Slug.Trim()==slug.Trim()&&x.ParentID==null);
             if (sanPham == null)
             {
                 return NotFound();
             }
 
-            return Ok(new
-            {
-                Id = sanPham?.Id,
-                MaSanPham = sanPham.MaSanPham.Trim(),
-                TenSanPham = sanPham?.TenSanPham.Trim(),
-                GiaBan = sanPham?.GiaBanLe,
-                GiamGia = sanPham?.GiamGia,
-                Slug = sanPham?.Slug,
-                BoSuuTap = sanPham.IdBstNavigation,
-                SoLuongTon = sanPham.SoLuongTon,
-                CoTheBan = sanPham.SoLuongCoTheban,
-                LoaiHang = sanPham?.TypeNavigation,
-                NhanHieu = sanPham?.BrandNavigation,
-                VAT = sanPham?.VatNavigation,
-                IDType = sanPham?.IDType,
-                IDBrand= sanPham?.IDBrand,
-                IDVAT = sanPham?.IDVat,
-                HinhAnhs = sanPham?.ChiTietHinhAnhs.Select(x => new
-                {
-                    uid = x.IdHinhAnh,
-                    name=x.IdHinhAnhNavigation.FileName,
-                    status="done",
-                    url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + x.MaSanPham.Trim() + "\\" + x.IdMaMau.Trim() + "\\" + x.IdHinhAnhNavigation.FileName.Trim(),
-                    IdMaMau = x.IdMaMau,
-                }).GroupBy(x => x.IdMaMau)
-                ,SanPhams = sanPham.SanPhams,
-            });; ;
+            return Ok(sanPham);; ;
         }
 
         // PUT: api/SanPham/5
@@ -186,23 +163,66 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpPut]
         public async Task<IActionResult> PutSanPham( SanPham sanPham)
         {
-
             try
             {
-                foreach(var product in sanPham.SanPhams)
+                var product = _context.SanPhams.Include(x => x.DanhMucDetails).AsNoTracking().FirstOrDefault(x => x.MaSanPham == sanPham.MaSanPham);
+                if (product.DanhMucDetails.Count > 0)
                 {
-                    _context.Entry(product).State = EntityState.Modified;
+                    bool check = IsAny(product.DanhMucDetails.ToList(), sanPham.DanhMucDetails.ToList());
+                    if (!check)
+                    {
+                        
+                        //_context.DanhMucDetails.RemoveRange(product.DanhMucDetails);
+                        foreach(var removeItem in product.DanhMucDetails)
+                        {
+
+                        _context.Entry(removeItem).State = EntityState.Deleted;
+                        }
+                        foreach (var addItem in sanPham.DanhMucDetails)
+                        {
+
+                            _context.Entry(addItem).State = EntityState.Added;
+                        }
+                        //_context.Entry(sanPham.DanhMucDetails).State = EntityState.Added;
+                        //_context.DanhMucDetails.AddRange(sanPham.DanhMucDetails);
+                    }
+                }
+                else
+                {
+                    _context.DanhMucDetails.AddRange(sanPham.DanhMucDetails);
+                }
+                foreach (var item in sanPham.SanPhams)
+                {
+                    item.SanPhamNavigation = null;
+                    item.ChiTietNhapXuats = null;
+                    item.KhoHangs = null;
+                    item.DanhMucDetails = null;
+                    _context.Entry(item).State = EntityState.Modified;
                 }
                 _context.Entry(sanPham).State = EntityState.Modified;
                 _context.SaveChanges();
-                return Ok();
+                return Ok(sanPham);
             }
             catch(Exception err)
             {
                 return BadRequest(err.Message);
             }
         }
-
+        private bool IsAny(List<DanhMucDetails> s1, List<DanhMucDetails>   s2)
+        {
+            if(s1.Count!=s2.Count)
+            {
+                return false;
+            }
+            for (int i = 0;i < s1.Count;i++)
+            {
+                if (s1[i].danhMucId != s2[i].danhMucId)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
         // POST: api/SanPham
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -212,22 +232,16 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             ChiNhanh_SanPham khohang = new ChiNhanh_SanPham();
             try
             {
-                
-                if(body.MaSanPham==null || body.MaSanPham.Length==0)
+
+                if (body.MaSanPham == null || body.MaSanPham.Length == 0)
                 {
                     var ID = new GenKey();
                     _context.Keys.Add(ID);
                     await _context.SaveChangesAsync();
-                    body.MaSanPham = "CTK0"+ ID.ID.ToString();
+                    body.MaSanPham = "CTK0" + ID.ID.ToString();
                     body.Slug = CustomSlug.Slugify(body.TenSanPham) + "_" + body.MaSanPham;
-                    khohang.MaSanPham = body.MaSanPham;
-                    khohang.MaChiNhanh = "CN01";
-                    var history = new LichSuNhapXuatHang();
-                    history.Name = "Khởi tạo version";
-                    _context.LichSuNhapHangs.Add(history);
-                    await _context.SaveChangesAsync();
-                    khohang.IDLichSu = history.ID;
                 }
+                
                 var products = body.SanPhams.ToList();
                if(products.Count>0)
                 {
@@ -236,10 +250,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                         if (products[i].MaSanPham == null || products[i].MaSanPham.Length == 0)
                         {
                             var ID = new GenKey();
-                            var history = new LichSuNhapXuatHang();
-                            history.Name = "Khởi tạo version";
                             _context.Keys.Add(ID);
-                            _context.LichSuNhapHangs.Add(history);
                             await _context.SaveChangesAsync();
                             products[i].IDVat = body.IDVat;
                             products[i].IDBrand = body.IDBrand;
@@ -247,23 +258,12 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
                             products[i].MaSanPham = "CTK0" + ID.ID.ToString();
                             products[i].ParentID = body.MaSanPham;
                             products[i].Slug = CustomSlug.Slugify(products[i].TenSanPham) + "_" + products[i].MaSanPham;
-                            products[i].KhoHangs.Add(new ChiNhanh_SanPham()
-                            {
-                                SoLuongTon =  products[i].SoLuongTon,
-                                SoLuongCoTheban = products[i].SoLuongCoTheban,
-                                SoLuongHangDangGiao = 0,
-                                SoLuongHangDangVe=0,
-                                GiaVon = products[i]?.GiaVon,    
-                                IDLichSu = history.ID,
-                                MaSanPham = products[i].MaSanPham,
-                                MaChiNhanh ="CN01" /*body.KhoHangs.ToArray()[0].MaChiNhanh*/,
-                            });
+
                         }
                     }
                 }
-                body.KhoHangs =new List<ChiNhanh_SanPham>();
+               
                 _context.SanPhams.Add(body);
-                _context.KhoHangs.Add(khohang);
                 await _context.SaveChangesAsync();
                 await trans.CommitAsync();
                 return Ok(body);
@@ -419,7 +419,7 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         {
             if (file is null) return BadRequest();
 
-            var folder = "wwwroot/res/SanPhamRes/Imgs/" + maSP + "/" + MaMau + "/";
+            var folder = "wwwroot/res/SanPhamRes/Imgs/" + maSP.Trim() + "/" + MaMau + "/";
             var path = Path.Combine(
       Directory.GetCurrentDirectory(), folder,
       file.FileName);
@@ -433,29 +433,47 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
             }
             using (var stream = new FileStream(path, FileMode.Create))
             {
+                var baseURL = _configuration.GetSection("BaseURL").Value;
                 var trans = _context.Database.BeginTransaction();
                 try
                 {
-                    await file.CopyToAsync(stream);
-                    HinhAnh anh = new HinhAnh();
-                    anh.FileName = file.FileName;
-                    _context.HinhAnhs.Add(anh);
-                    await _context.SaveChangesAsync();
-                    ChiTietHinhAnh hinhAnhSanPham = new ChiTietHinhAnh();
-                    hinhAnhSanPham.IdHinhAnh = anh.Id;
-                    hinhAnhSanPham.MaSanPham = maSP;
-                    hinhAnhSanPham.IdMaMau = MaMau;
-                    _context.ChiTietHinhAnhs.Add(hinhAnhSanPham);
-                    await _context.SaveChangesAsync();
-                    await trans.CommitAsync();
-                    return Ok(new
+                    var sanPhamRoot = _context.SanPhams.Include(x=>x.SanPhams).FirstOrDefault(x=>x.MaSanPham==maSP);
+                    if(sanPhamRoot!=null&&sanPhamRoot.SanPhams.Count>0)
                     {
-                        idMaMau = hinhAnhSanPham.IdMaMau.Trim(),
-                        uid = hinhAnhSanPham.IdHinhAnh,
-                        name = file.FileName,
-                        status = "done",
-                        url = "https:\\localhost:44328\\wwwroot\\res\\SanPhamRes\\Imgs\\" + hinhAnhSanPham.MaSanPham + "\\" + hinhAnhSanPham.IdMaMau + "\\" + file.FileName.Trim()
-                    });
+                        var colors =  sanPhamRoot.SanPhams.Where(x => x.IDColor.Trim() == MaMau);
+                        if(colors.Count()>0)
+                        {
+                            
+                                HinhAnh anh = new HinhAnh();
+                                anh.FileName = file.FileName;
+                            _context.HinhAnhs.Add(anh);
+                            await _context.SaveChangesAsync();
+
+                            foreach (var color in colors)
+                            {
+                                ChiTietHinhAnh hinhAnhSanPham = new ChiTietHinhAnh();
+                                hinhAnhSanPham.IdHinhAnh = anh.Id;
+                                hinhAnhSanPham.MaSanPham = color.MaSanPham;
+                                hinhAnhSanPham.IdMaMau = MaMau;
+                                _context.ChiTietHinhAnhs.Add(hinhAnhSanPham);
+                            }
+                            await file.CopyToAsync(stream);
+                            await _context.SaveChangesAsync();
+                            await trans.CommitAsync();
+                            return Ok(new
+                            {
+                                uid= anh.Id,
+                                name = anh.FileName,
+                                status="done",
+                                url = baseURL + "\\wwwroot\\res\\SanPhamRes\\Imgs\\" + maSP.Trim() + "\\" + MaMau.Trim() + "\\" +anh.FileName.Trim()
+
+                            });;
+                        }
+                    }
+                    return BadRequest();
+
+                  
+                    
 
                 }
                 catch (Exception err)

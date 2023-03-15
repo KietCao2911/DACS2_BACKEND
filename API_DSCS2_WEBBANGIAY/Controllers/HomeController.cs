@@ -18,39 +18,39 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
         {
             _context = context;
         }
-        [HttpGet("ProductsLatesUpdate/{MaChiNhanh}")]
+        [HttpGet("ProductsLatesUpdate")]
         public async Task<IActionResult> ProductsLatesUpdate(string MaChiNhanh)
         {
-            var khohangs =  _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.BranchNavigation);
-            var temp = await _context.KhoHangs.Include(x => x.SanPhamNavigation).ThenInclude(x => x.IdBstNavigation)
-                       .Include(x => x.SanPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).
-                       ThenInclude(x => x.IdHinhAnhNavigation)
-                       .Include(x => x.SanPhamNavigation).ThenInclude(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs)
-                       .Include(x => x.SanPhamNavigation).ThenInclude(x => x.TypeNavigation)
-                       .Include(x => x.SanPhamNavigation).ThenInclude(x => x.BrandNavigation)
-                       .Include(x => x.SanPhamNavigation).ThenInclude(x => x.DanhMucDetails)
-                .Include(x => x.BranchNavigation).Where(x => x.SanPhamNavigation.ParentID == null).Where(x=>x.BranchNavigation.MaChiNhanh.Trim()== MaChiNhanh).OrderBy(x => x.SanPhamNavigation.CreatedAt).ToListAsync();
-            //var products = await _context.SanPhams
-            //      .Include(x => x.IdBstNavigation).
-            //           Include(x => x.ChiTietHinhAnhs).
+            //var khohangs =  _context.KhoHangs.Include(x => x.SanPhamNavigation).Include(x => x.BranchNavigation);
+            //var temp = await _context.KhoHangs.Include(x => x.SanPhamNavigation).ThenInclude(x => x.IdBstNavigation)
+            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.ChiTietHinhAnhs).
             //           ThenInclude(x => x.IdHinhAnhNavigation)
-            //           .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs)
-            //           .Include(x => x.TypeNavigation)
-            //           .Include(x => x.BrandNavigation)
-            //           .Include(x => x.DanhMucDetails)
-            //           .Include(x=>x.KhoHangs)
-            //           .Where(x => x.ParentID == null)
-            //   .OrderBy(x => x.CreatedAt).ToListAsync();
-            var select = temp.Select(x => new
+            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs)
+            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.TypeNavigation)
+            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.BrandNavigation)
+            //           .Include(x => x.SanPhamNavigation).ThenInclude(x => x.DanhMucDetails)
+            //    .Include(x => x.BranchNavigation).Where(x => x.SanPhamNavigation.ParentID == null).Where(x=>x.BranchNavigation.MaChiNhanh.Trim()== MaChiNhanh).OrderBy(x => x.SanPhamNavigation.CreatedAt).ToListAsync();
+            var products = await _context.SanPhams
+                  .Include(x => x.IdBstNavigation).
+                       Include(x => x.ChiTietHinhAnhs).
+                       ThenInclude(x => x.IdHinhAnhNavigation)
+                       .Include(x => x.SanPhams).ThenInclude(x => x.ChiTietHinhAnhs).ThenInclude(x=>x.IdHinhAnhNavigation)
+                       .Include(x => x.TypeNavigation)
+                       .Include(x => x.BrandNavigation)
+                       .Include(x => x.DanhMucDetails)
+                       .Include(x => x.KhoHangs)
+                       .Where(x => x.ParentID == null)
+               .OrderBy(x => x.CreatedAt).ToListAsync();
+            var select = products.Select(x => new
             {
-                Id = x.SanPhamNavigation.Id,
+                Id = x.Id,
                 MaSanPham = x.MaSanPham.Trim(),
-                TenSanPham = x.SanPhamNavigation.TenSanPham.Trim(),
-                GiaBan = x.SanPhamNavigation.GiaBanLe,
-                GiamGia = x.SanPhamNavigation.GiamGia,
-                Slug = x.SanPhamNavigation.Slug,
-                BoSuuTap = x.SanPhamNavigation.IdBstNavigation,
-                HinhAnhs = x.SanPhamNavigation.ChiTietHinhAnhs.Select(x => new
+                TenSanPham = x.TenSanPham.Trim(),
+                GiaBan = x.GiaBanLe,
+                GiamGia = x.GiamGia,
+                Slug = x.Slug,
+                BoSuuTap = x.IdBstNavigation,
+                HinhAnhs = x.ChiTietHinhAnhs.Select(x => new
                 {
                     uid = x.IdHinhAnh,
                     name = x.IdHinhAnhNavigation.FileName,
@@ -60,14 +60,14 @@ namespace API_DSCS2_WEBBANGIAY.Controllers
                 }).GroupBy(x => x.IdMaMau),
                 SoLuongTon = x.SoLuongTon,
                 CoTheBan = x.SoLuongCoTheban,
-                LoaiHang = x.SanPhamNavigation.TypeNavigation,
-                NhanHieu = x.SanPhamNavigation.BrandNavigation,
-                MauSac = x.SanPhamNavigation.MauSacNavigation,
-                KichThuoc = x.SanPhamNavigation.SizeNavigation,
-                IDType = x.SanPhamNavigation.IDType,
-                IDBrand = x.SanPhamNavigation.IDBrand,
-                SanPhams = x.SanPhamNavigation.SanPhams,
-                KhoHangs= x.SanPhamNavigation.KhoHangs,
+                LoaiHang = x.TypeNavigation,
+                NhanHieu = x.BrandNavigation,
+                MauSac = x.MauSacNavigation,
+                KichThuoc = x.SizeNavigation,
+                IDType = x.IDType,
+                IDBrand = x.IDBrand,
+                SanPhams = x.SanPhams,
+                KhoHangs= x.KhoHangs,
             }); ; ;
             return Ok(select);
         }

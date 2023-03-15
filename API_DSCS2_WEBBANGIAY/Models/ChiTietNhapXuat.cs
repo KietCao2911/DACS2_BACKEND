@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace API_DSCS2_WEBBANGIAY.Models
 {
-    public partial class ChiTietPhieuNhap
+    public class ChiTietNhapXuat
     {
-        public ChiTietPhieuNhap()
+        public ChiTietNhapXuat()
         {
         }
         public string MaSanPham { get; set; }
@@ -15,13 +15,13 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public string MaChiNhanh { get; set; }
         public int SoLuong { get; set; } = 0;
         public decimal ThanhTien { get; set; } = 0;
-        public decimal DonGia { get; set; } = 0;   
-        public string logText { get; set; } = "";
+        public decimal DonGia { get; set; } = 0;
+        public string DVT { get; set; } = "";
+        public string TenPhieu { get; set; } = "";
         public DateTime createdAT { get; set; } = DateTime.Now;
         public DateTime updatedAT { get; set; } = DateTime.Now;
         public virtual SanPham SanPhamNavigation { get; set; }
-        public virtual PhieuNhap PhieuNhapNavigation { get; set; }
+        public virtual PhieuNhapXuat PhieuNhapXuatNavigation { get; set; }
         public virtual Branchs KhoHangNavigation { get; set; }
-
     }
 }

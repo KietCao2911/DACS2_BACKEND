@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230305072123_alterTablePhieuNhap")]
+    partial class alterTablePhieuNhap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,52 +232,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.ToTable("ChiTietHoaDon");
                 });
 
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietNhapXuat", b =>
-                {
-                    b.Property<string>("MaSanPham")
-                        .HasColumnType("char(10)");
-
-                    b.Property<int>("IDPN")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MaChiNhanh")
-                        .HasColumnType("char(20)");
-
-                    b.Property<string>("DVT")
-                        .HasColumnType("char(10)");
-
-                    b.Property<decimal>("DonGia")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("SoLuong")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TenPhieu")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("ThanhTien")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("createdAT")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("updatedAT")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("MaSanPham", "IDPN", "MaChiNhanh");
-
-                    b.HasIndex("IDPN");
-
-                    b.HasIndex("MaChiNhanh");
-
-                    b.ToTable("ChiTietNhapXuats");
-                });
-
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietPhieuNhap", b =>
                 {
                     b.Property<string>("MaSanPham")
@@ -287,9 +243,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<string>("MaChiNhanh")
                         .HasColumnType("char(20)");
 
-                    b.Property<decimal>("DonGia")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -297,9 +250,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.Property<int>("SoLuong")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("ThanhTien")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("createdAT")
                         .HasColumnType("datetime2");
@@ -565,22 +515,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.ToTable("KhachHang");
                 });
 
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.LoaiPhieu", b =>
-                {
-                    b.Property<string>("MaPhieu")
-                        .HasColumnType("char(10)");
-
-                    b.Property<string>("MoTa")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TenPhieu")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("MaPhieu");
-
-                    b.ToTable("LoaiPhieu");
-                });
-
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.MauSac", b =>
                 {
                     b.Property<string>("MaMau")
@@ -671,9 +605,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Property<bool>("DaNhapHang")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("DaThanhToan")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Dvt")
                         .HasColumnType("nvarchar(10)");
 
@@ -685,14 +616,17 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<int?>("NhaCungCapNavigationID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoMatHang")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("ThanhTien")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("TienDaThanhToan")
+                    b.Property<decimal?>("ThanhToan")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("TongSoLuong")
-                        .HasColumnType("int");
 
                     b.Property<int>("status")
                         .HasColumnType("int");
@@ -702,99 +636,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("IDNCC");
+                    b.HasIndex("NhaCungCapNavigationID");
 
                     b.ToTable("PhieuNhaps");
-                });
-
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.PhieuNhapXuat", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("ChietKhau")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("DaNhapHang")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("DaThanhToan")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("DeliveryStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DiaChiNavigationID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IDNCC")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IdDiaChi")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("KhachHangNavigationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LoaiPhieu")
-                        .HasColumnType("char(10)");
-
-                    b.Property<decimal?>("Phiship")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PhuongThucThanhToan")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TenTaiKhoanNavigationTenTaiKhoan")
-                        .HasColumnType("char(20)");
-
-                    b.Property<decimal?>("ThanhTien")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("TienDaGiam")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("TienDaThanhToan")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("TongSoLuong")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<int?>("idKH")
-                        .HasColumnType("int");
-
-                    b.Property<string>("idTaiKhoan")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("status")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("steps")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("updatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DiaChiNavigationID");
-
-                    b.HasIndex("IDNCC");
-
-                    b.HasIndex("KhachHangNavigationId");
-
-                    b.HasIndex("LoaiPhieu");
-
-                    b.HasIndex("TenTaiKhoanNavigationTenTaiKhoan");
-
-                    b.ToTable("PhieuNhapXuats");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ReviewStar", b =>
@@ -981,9 +825,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("char(10)");
 
                     b.Property<string>("Slug")
-                        .HasMaxLength(500)
+                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("char(500)")
+                        .HasColumnType("char(50)")
                         .HasColumnName("slug")
                         .IsFixedLength(true);
 
@@ -995,7 +839,8 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
                     b.Property<string>("TenSanPham")
                         .IsRequired()
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -1233,33 +1078,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("MausacPhamNavigation");
                 });
 
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietNhapXuat", b =>
-                {
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.PhieuNhapXuat", "PhieuNhapXuatNavigation")
-                        .WithMany("ChiTietNhapXuats")
-                        .HasForeignKey("IDPN")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.Branchs", "KhoHangNavigation")
-                        .WithMany("ChiTietNhapXuats")
-                        .HasForeignKey("MaChiNhanh")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.SanPham", "SanPhamNavigation")
-                        .WithMany("ChiTietNhapXuats")
-                        .HasForeignKey("MaSanPham")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("KhoHangNavigation");
-
-                    b.Navigation("PhieuNhapXuatNavigation");
-
-                    b.Navigation("SanPhamNavigation");
-                });
-
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ChiTietPhieuNhap", b =>
                 {
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.PhieuNhap", "PhieuNhapNavigation")
@@ -1374,46 +1192,10 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                 {
                     b.HasOne("API_DSCS2_WEBBANGIAY.Models.NCC", "NhaCungCapNavigation")
                         .WithMany("PhieuNhaps")
-                        .HasForeignKey("IDNCC")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("NhaCungCapNavigation");
-                });
-
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.PhieuNhapXuat", b =>
-                {
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.DiaChi", "DiaChiNavigation")
-                        .WithMany()
-                        .HasForeignKey("DiaChiNavigationID");
-
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.NCC", "NhaCungCapNavigation")
-                        .WithMany("PhieuNhapXuats")
-                        .HasForeignKey("IDNCC")
+                        .HasForeignKey("NhaCungCapNavigationID")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.KhachHang", "KhachHangNavigation")
-                        .WithMany()
-                        .HasForeignKey("KhachHangNavigationId");
-
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.LoaiPhieu", "LoaiPhieuNavigation")
-                        .WithMany("PhieuNhapXuats")
-                        .HasForeignKey("LoaiPhieu")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("API_DSCS2_WEBBANGIAY.Models.TaiKhoan", "TenTaiKhoanNavigation")
-                        .WithMany()
-                        .HasForeignKey("TenTaiKhoanNavigationTenTaiKhoan");
-
-                    b.Navigation("DiaChiNavigation");
-
-                    b.Navigation("KhachHangNavigation");
-
-                    b.Navigation("LoaiPhieuNavigation");
-
                     b.Navigation("NhaCungCapNavigation");
-
-                    b.Navigation("TenTaiKhoanNavigation");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.ReviewStar", b =>
@@ -1529,8 +1311,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.Branchs", b =>
                 {
-                    b.Navigation("ChiTietNhapXuats");
-
                     b.Navigation("KhoHangs");
 
                     b.Navigation("PhieuNhaps");
@@ -1576,11 +1356,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("TaiKhoans");
                 });
 
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.LoaiPhieu", b =>
-                {
-                    b.Navigation("PhieuNhapXuats");
-                });
-
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.MauSac", b =>
                 {
                     b.Navigation("ChiTietHinhAnhs");
@@ -1600,8 +1375,6 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.NCC", b =>
                 {
                     b.Navigation("PhieuNhaps");
-
-                    b.Navigation("PhieuNhapXuats");
                 });
 
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.PhieuNhap", b =>
@@ -1609,18 +1382,11 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                     b.Navigation("ChiTietPhieuNhaps");
                 });
 
-            modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.PhieuNhapXuat", b =>
-                {
-                    b.Navigation("ChiTietNhapXuats");
-                });
-
             modelBuilder.Entity("API_DSCS2_WEBBANGIAY.Models.SanPham", b =>
                 {
                     b.Navigation("ChiTietHinhAnhs");
 
                     b.Navigation("ChiTietHoaDons");
-
-                    b.Navigation("ChiTietNhapXuats");
 
                     b.Navigation("ChiTietPhieuNhaps");
 

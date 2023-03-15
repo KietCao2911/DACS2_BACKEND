@@ -4,14 +4,16 @@ using API_DSCS2_WEBBANGIAY.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API_DSCS2_WEBBANGIAY.Migrations
 {
     [DbContext(typeof(ShoesEcommereContext))]
-    partial class ShoesEcommereContextModelSnapshot : ModelSnapshot
+    [Migration("20230310081453_changeFieldNameThanhtienToThanhTien")]
+    partial class changeFieldNameThanhtienToThanhTien
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -981,9 +983,9 @@ namespace API_DSCS2_WEBBANGIAY.Migrations
                         .HasColumnType("char(10)");
 
                     b.Property<string>("Slug")
-                        .HasMaxLength(500)
+                        .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("char(500)")
+                        .HasColumnType("char(50)")
                         .HasColumnName("slug")
                         .IsFixedLength(true);
 

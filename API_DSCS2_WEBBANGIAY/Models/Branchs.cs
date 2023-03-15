@@ -8,6 +8,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         {
             KhoHangs = new HashSet<ChiNhanh_SanPham>();
             PhieuNhaps = new HashSet<ChiTietPhieuNhap>();
+            ChiTietNhapXuats = new HashSet<ChiTietNhapXuat>();
         }
 
         public int ID { get; set; }
@@ -18,6 +19,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public DiaChi DiaChiNavigation { get; set; }
         public virtual ICollection<ChiNhanh_SanPham> KhoHangs { get; set; }
         public virtual ICollection<ChiTietPhieuNhap> PhieuNhaps { get; set; }
+        public virtual ICollection<ChiTietNhapXuat> ChiTietNhapXuats { get; set; }
 
     }
 }

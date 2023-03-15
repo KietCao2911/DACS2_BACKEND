@@ -18,6 +18,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
             RoomMessages = new HashSet<RoomMessage>();
             SanPhams = new HashSet<SanPham>();
             KhoHangs = new HashSet<ChiNhanh_SanPham>();
+            ChiTietNhapXuats= new HashSet<ChiTietNhapXuat>();   
         }
 
         //public string MaSanPham { get; set; }
@@ -57,6 +58,7 @@ namespace API_DSCS2_WEBBANGIAY.Models
         public virtual ICollection<DanhMucDetails> DanhMucDetails { get; set; }
         public virtual ICollection<ChiTietHinhAnh> ChiTietHinhAnhs { get; set; }
         public virtual ICollection<ChiTietPhieuNhap> ChiTietPhieuNhaps { get; set; }
+        public virtual ICollection<ChiTietNhapXuat> ChiTietNhapXuats { get; set; }
         public virtual ICollection<SanPham>SanPhams { get; set; }
         public virtual ICollection<RoomMessage> RoomMessages { get; set; }
         public virtual ICollection<ChiNhanh_SanPham> KhoHangs { get; set; }

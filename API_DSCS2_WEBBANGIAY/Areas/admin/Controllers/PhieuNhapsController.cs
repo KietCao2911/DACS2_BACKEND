@@ -22,74 +22,57 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
 
         // GET: api/PhieuNhaps
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PhieuNhap>>> GetPhieuNhaps()
+        public async Task<ActionResult<IEnumerable<PhieuNhapXuat>>> GetPhieuNhaps()
         {
-            return await _context.PhieuNhaps.ToListAsync();
+            return await _context.PhieuNhapXuats.Where(x=>x.LoaiPhieu=="PHIEUNHAP").ToListAsync();
         }
 
         // GET: api/PhieuNhaps/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<PhieuNhap>> GetPhieuNhap(string id)
+        public async Task<ActionResult<PhieuNhapXuat>> GetPhieuNhap(int id)
         {
-            var phieuNhap = await _context.PhieuNhaps.FindAsync(id);
-
+            var phieuNhap = await _context.PhieuNhapXuats.Include(x=>x.ChiTietNhapXuats).ThenInclude(x=>x.SanPhamNavigation).Include(x=>x.NhaCungCapNavigation).ThenInclude(x=>x.DiaChiNavigation).FirstOrDefaultAsync(x=>x.Id ==id);
             if (phieuNhap == null)
             {
                 return NotFound();
             }
-
             return phieuNhap;
         }
 
-        // PUT: api/PhieuNhaps/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPhieuNhap(string id, PhieuNhap phieuNhap)
-        {
-            if (id != phieuNhap.maPhieuNhap.Trim())
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(phieuNhap).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return Ok(phieuNhap);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PhieuNhapExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
 
         // POST: api/PhieuNhaps
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<PhieuNhap>> PostPhieuNhap(PhieuNhap phieuNhap)
+        public async Task<ActionResult<PhieuNhap>> PostPhieuNhap(PhieuNhapXuat body)
         {
-            _context.PhieuNhaps.Add(phieuNhap);
             try
             {
+                if(body.steps<=2)
+                {
+                    foreach (var item in body.ChiTietNhapXuats)
+                    {
+                        var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == item.MaChiNhanh);
+                        item.TenPhieu = "Nhập hàng vào kho";
+                        if (khohang is not null)
+                        {
+                            khohang.SoLuongHangDangVe += item.SoLuong;
+                            _context.KhoHangs.Update(khohang);
+                        }
+
+                    }
+                }
+               
+                body.status = 1;
+                body.NhaCungCapNavigation = null;
+                _context.PhieuNhapXuats.Add(body);
+
                 await _context.SaveChangesAsync();
-                phieuNhap.maPhieuNhap = "PN" + phieuNhap.ID;
-                _context.PhieuNhaps.Update(phieuNhap);
-                await _context.SaveChangesAsync();
-                return Ok(phieuNhap);
+                return Ok(body);
             }
             catch (Exception err)
             {
-                return BadRequest(err.Message);
+                return BadRequest(err.InnerException.Message);
             }
 
         }
@@ -98,21 +81,86 @@ namespace API_DSCS2_WEBBANGIAY.Areas.admin.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePhieuNhap(string id)
         {
-            var phieuNhap = await _context.PhieuNhaps.FindAsync(id);
+            var phieuNhap = await _context.PhieuNhapXuats.FindAsync(id);
             if (phieuNhap == null)
             {
                 return NotFound();
             }
 
-            _context.PhieuNhaps.Remove(phieuNhap);
+            _context.PhieuNhapXuats.Remove(phieuNhap);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
-        private bool PhieuNhapExists(string id)
+        [HttpPut("ThanhToan")]
+        public async Task<IActionResult> ThanhToan(PhieuNhapXuat body)
         {
-            return _context.PhieuNhaps.Any(e => e.maPhieuNhap == id);
+            var trans = _context.Database.BeginTransaction();
+            try
+            {
+             
+                if ((bool)body.DaNhapHang)
+                {
+                    body.steps = 4;
+                    body.status = 1;
+                }
+                body.DaNhapHang = true;
+                body.ChiTietNhapXuats = null;
+                _context.PhieuNhapXuats.Update(body);
+                await _context.SaveChangesAsync();
+                await trans.CommitAsync();
+                return Ok();
+            }
+            catch (Exception err)
+            {
+                return BadRequest();
+                await trans.RollbackAsync();
+            }
         }
+        [HttpPut("NhapKho")]
+        public async Task<IActionResult> NhapKho(PhieuNhapXuat body)
+        {
+            var trans = _context.Database.BeginTransaction();
+            try
+            {
+                foreach(var item in body.ChiTietNhapXuats)
+                {
+                    var khohang = _context.KhoHangs.FirstOrDefault(x => x.MaSanPham == item.MaSanPham && x.MaChiNhanh == item.MaChiNhanh);
+                    
+                    if(khohang is not null)
+                    {
+                        var sanpham = _context.SanPhams.FirstOrDefault(x => x.MaSanPham == khohang.MaSanPham);
+                        khohang.SoLuongTon += item.SoLuong;
+                        khohang.SoLuongCoTheban += item.SoLuong;
+                        khohang.SoLuongHangDangVe -= item.SoLuong;
+                        if(sanpham is not null)
+                        {
+                            sanpham.SoLuongTon += item.SoLuong;
+                            sanpham.SoLuongCoTheban += item.SoLuong;
+                            _context.SanPhams.Update(sanpham);
+                        }
+                        _context.Entry(khohang).State = EntityState.Modified;
+                    }
+                }
+                body.DaNhapHang = true;
+                body.steps = 3;
+                if((bool)body.DaThanhToan)
+                {
+                    body.steps = 4;
+                    body.status = 1;
+                }
+                body.ChiTietNhapXuats = null;
+                _context.PhieuNhapXuats.Update(body);
+                await _context.SaveChangesAsync();
+                await trans.CommitAsync();
+                return Ok();
+            }
+            catch(Exception err)
+            {
+                return BadRequest();
+                await trans.RollbackAsync();
+            }
+        }
+      
     }
 }
